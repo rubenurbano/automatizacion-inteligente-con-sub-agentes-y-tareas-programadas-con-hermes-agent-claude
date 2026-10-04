@@ -1,0 +1,2095 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía Práctica de Hermes Agent — Tutorial Interactivo</title>
+<style>
+:root{
+  --bg:#0a0e1a;
+  --card:#0f172a;
+  --accent-blue:#1e3a5f;
+  --border:#1e293b;
+  --text:#e2e8f0;
+  --muted:#94a3b8;
+  --accent:#38bdf8;
+  --accent2:#818cf8;
+  --ok:#34d399;
+  --warn:#fbbf24;
+  --bad:#f87171;
+  --radius:14px;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+}
+body.light{
+  --bg:#eef2f7;
+  --card:#ffffff;
+  --accent-blue:#dbeafe;
+  --border:#cbd5e1;
+  --text:#0f172a;
+  --muted:#475569;
+  --shadow:0 8px 24px rgba(15,23,42,.10);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:16px;
+  line-height:1.65;
+  transition:background .25s,color .25s;
+  padding-bottom:80px;
+}
+img,svg{max-width:100%;}
+a{color:var(--accent);}
+
+/* ---------- Barra de progreso ---------- */
+.progress-bar{
+  position:fixed;top:0;left:0;width:100%;height:4px;background:transparent;z-index:200;
+}
+.progress-bar-fill{
+  height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));
+  transition:width .12s linear;
+}
+
+/* ---------- Toolbar ---------- */
+.toolbar{
+  position:sticky;top:0;z-index:150;
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  padding:10px 14px;
+  background:color-mix(in srgb,var(--card) 92%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.toolbar .brand{
+  font-weight:700;font-size:.92rem;letter-spacing:.4px;margin-right:auto;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+  white-space:nowrap;
+}
+.toolbar input[type=search]{
+  flex:1 1 160px;min-width:120px;
+  padding:8px 12px;border-radius:999px;
+  border:1px solid var(--border);background:var(--bg);color:var(--text);
+  font-size:.86rem;outline:none;
+}
+.toolbar input[type=search]:focus{border-color:var(--accent);}
+.btn{
+  cursor:pointer;border:1px solid var(--border);
+  background:var(--card);color:var(--text);
+  padding:7px 12px;border-radius:10px;font-size:.82rem;
+  transition:.18s;white-space:nowrap;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px);}
+.btn:active{transform:translateY(0);}
+.btn.icon{padding:7px 10px;font-weight:700;}
+
+/* ---------- Tabs ---------- */
+.tabs{
+  position:sticky;top:53px;z-index:140;
+  display:flex;gap:6px;overflow-x:auto;
+  padding:10px 14px;
+  background:color-mix(in srgb,var(--bg) 94%, transparent);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border);
+  scrollbar-width:thin;
+}
+.tabs::-webkit-scrollbar{height:5px;}
+.tabs::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.tab{
+  flex:0 0 auto;cursor:pointer;
+  padding:8px 14px;border-radius:999px;
+  border:1px solid var(--border);background:var(--card);color:var(--muted);
+  font-size:.8rem;font-weight:600;letter-spacing:.4px;
+  transition:.18s;
+}
+.tab:hover{color:var(--text);border-color:var(--accent);}
+.tab.active{
+  background:linear-gradient(135deg,var(--accent-blue),#123055);
+  color:#fff;border-color:var(--accent);
+  box-shadow:0 0 0 1px rgba(56,189,248,.35),0 6px 18px rgba(56,189,248,.18);
+}
+body.light .tab.active{color:#0b2545;}
+
+/* ---------- Panels ---------- */
+main{max-width:960px;margin:0 auto;padding:18px 14px 40px;}
+.panel{display:none;animation:fade .35s ease;}
+.panel.active{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+/* ---------- Tipografía ---------- */
+h1{font-size:1.6rem;line-height:1.25;margin:.4em 0 .3em;}
+h2{font-size:1.25rem;margin:1.6em 0 .5em;padding-bottom:.3em;border-bottom:1px solid var(--border);}
+h3{font-size:1.05rem;margin:1.3em 0 .4em;color:var(--accent);}
+h4{font-size:.95rem;margin:1.1em 0 .3em;}
+p{margin:.6em 0;}
+ul,ol{padding-left:1.3em;margin:.6em 0;}
+li{margin:.25em 0;}
+strong{color:var(--text);}
+code{
+  background:var(--accent-blue);color:#dbeafe;
+  padding:2px 6px;border-radius:6px;font-size:.86em;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+body.light code{background:#e2e8f0;color:#0f172a;}
+
+/* ---------- Tarjetas ---------- */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px 18px;
+  margin:14px 0;
+  box-shadow:var(--shadow);
+}
+.card h3:first-child,.card h2:first-child{margin-top:0;}
+
+/* ---------- Cajas de aviso ---------- */
+.box{border-radius:12px;padding:12px 14px;margin:14px 0;border-left:4px solid var(--accent);background:var(--card);}
+.box.note{border-color:var(--accent);}
+.box.tip{border-color:var(--ok);}
+.box.warn{border-color:var(--warn);}
+.box.imp{border-color:var(--accent2);}
+.box .lbl{display:block;font-size:.75rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;opacity:.85;}
+.box.note .lbl{color:var(--accent);}
+.box.tip .lbl{color:var(--ok);}
+.box.warn .lbl{color:var(--warn);}
+.box.imp .lbl{color:var(--accent2);}
+
+/* ---------- Tablas ---------- */
+.table-wrap{overflow-x:auto;margin:14px 0;border-radius:12px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:420px;}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;}
+th{background:var(--accent-blue);color:#e0f2fe;font-weight:700;font-size:.8rem;letter-spacing:.3px;text-transform:uppercase;}
+body.light th{color:#0b2545;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:nth-child(even){background:rgba(255,255,255,.02);}
+body.light tbody tr:nth-child(even){background:rgba(15,23,42,.03);}
+
+/* ---------- Código ---------- */
+.code-wrap{position:relative;margin:12px 0;}
+pre{
+  background:#060a14;border:1px solid var(--border);border-radius:12px;
+  padding:14px 14px;overflow-x:auto;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.82rem;line-height:1.55;color:#c7d7f0;margin:0;
+  white-space:pre-wrap;word-break:break-word;
+}
+body.light pre{background:#0f172a;color:#e2e8f0;}
+.copyBtn{
+  position:absolute;top:8px;right:8px;
+  background:var(--accent-blue);color:#cfe8ff;border:1px solid #2d4f7a;
+  padding:5px 10px;border-radius:8px;font-size:.7rem;font-weight:800;letter-spacing:.6px;
+  cursor:pointer;transition:.18s;z-index:2;
+}
+.copyBtn:hover{background:var(--accent);color:#00121f;}
+
+/* ---------- Diagramas de flujo ---------- */
+.flow{
+  display:flex;flex-direction:column;gap:6px;align-items:stretch;
+  margin:16px 0;padding:16px 12px;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+}
+.flow-node{
+  background:linear-gradient(135deg,var(--accent-blue),rgba(15,23,42,.9));
+  border:1px solid #2d4f7a;border-radius:10px;
+  padding:9px 12px;font-size:.85rem;text-align:center;color:#dbeafe;
+}
+body.light .flow-node{color:#0b2545;}
+.flow-node.hl{border-color:var(--accent);box-shadow:0 0 0 1px rgba(56,189,248,.4);}
+.flow-arrow{text-align:center;color:var(--accent);font-size:1rem;line-height:1;}
+.flow-row{display:flex;gap:8px;flex-wrap:wrap;}
+.flow-row .flow-node{flex:1 1 120px;}
+
+/* ---------- Hero SVG ---------- */
+.hero-svg-mount{
+  width:100%;margin:6px 0 14px;
+  border-radius:16px;overflow:hidden;
+  border:1px solid var(--border);
+  background:var(--card);
+}
+.hero-svg-mount svg,.hero-svg-mount img{display:block;width:100%;height:auto;}
+.hero-caption{
+  text-align:center;font-size:.8rem;color:var(--muted);
+  margin:-6px 0 16px;font-style:italic;
+}
+
+/* ---------- Hero título ---------- */
+.hero-title{
+  font-size:1.7rem;line-height:1.2;margin:.2em 0 .2em;font-weight:800;
+  background:linear-gradient(100deg,var(--accent),var(--accent2) 70%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+}
+.hero-sub{color:var(--muted);font-size:.95rem;margin-bottom:10px;}
+
+/* ---------- Checklist ---------- */
+.checklist{list-style:none;padding:0;margin:12px 0;}
+.checklist li{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:9px 12px;border-radius:10px;margin:6px 0;
+  background:var(--card);border:1px solid var(--border);
+  transition:.18s;
+}
+.checklist li:has(input:checked){border-color:var(--ok);background:rgba(52,211,153,.07);}
+.checklist input[type=checkbox]{
+  width:18px;height:18px;margin-top:3px;accent-color:var(--accent);flex:0 0 auto;cursor:pointer;
+}
+.checklist label{cursor:pointer;font-size:.9rem;}
+
+/* ---------- Details ---------- */
+details{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:10px 14px;margin:10px 0;
+}
+details summary{cursor:pointer;font-weight:700;font-size:.92rem;color:var(--accent);}
+details[open] summary{margin-bottom:8px;}
+
+/* ---------- Glosario ---------- */
+.gloss{display:grid;gap:10px;grid-template-columns:1fr;}
+@media(min-width:640px){.gloss{grid-template-columns:1fr 1fr;}}
+.gloss .item{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:12px 14px;
+}
+.gloss .item b{color:var(--accent);display:block;font-size:.9rem;margin-bottom:3px;}
+.gloss .item span{font-size:.85rem;color:var(--muted);}
+
+/* ---------- Créditos ---------- */
+.credit-author{
+  font-size:2rem;font-weight:800;letter-spacing:.5px;margin:.2em 0 .1em;
+  background:linear-gradient(100deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+}
+.credit-role{color:var(--muted);font-size:.95rem;margin-bottom:14px;}
+.meta-grid{display:grid;gap:8px;grid-template-columns:1fr;margin-top:10px;}
+@media(min-width:520px){.meta-grid{grid-template-columns:1fr 1fr;}}
+.meta-item{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:10px 12px;font-size:.85rem;
+}
+.meta-item .k{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;display:block;}
+.meta-item .v{font-weight:700;font-family:ui-monospace,Menlo,Consolas,monospace;}
+
+/* ---------- Volver arriba ---------- */
+.to-top{
+  position:fixed;right:16px;bottom:16px;z-index:160;
+  width:44px;height:44px;border-radius:50%;
+  border:1px solid var(--accent);background:var(--card);color:var(--accent);
+  font-size:1.1rem;cursor:pointer;display:none;align-items:center;justify-content:center;
+  box-shadow:var(--shadow);transition:.2s;
+}
+.to-top.show{display:flex;}
+.to-top:hover{background:var(--accent);color:#00121f;}
+
+/* ---------- Toast ---------- */
+.toast{
+  position:fixed;left:50%;bottom:24px;transform:translate(-50%,120%);
+  background:var(--accent);color:#00121f;font-weight:700;font-size:.85rem;
+  padding:10px 18px;border-radius:999px;z-index:300;transition:transform .3s;
+  pointer-events:none;box-shadow:0 8px 24px rgba(56,189,248,.35);
+}
+.toast.show{transform:translate(-50%,0);}
+
+/* ---------- Aviso impresión ---------- */
+.print-warn{
+  display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+  z-index:400;max-width:420px;width:88%;
+  background:var(--card);border:1px solid var(--warn);border-radius:14px;
+  padding:18px 20px;box-shadow:var(--shadow);font-size:.9rem;
+}
+.print-warn.show{display:block;}
+.print-warn h4{margin:0 0 8px;color:var(--warn);}
+.print-warn .btn{margin-top:12px;}
+
+/* ---------- Búsqueda resaltada ---------- */
+mark.search-hl{background:#facc15;color:#1a1a1a;padding:0 2px;border-radius:3px;}
+
+/* ---------- Responsive ---------- */
+@media(max-width:420px){
+  .hero-title{font-size:1.4rem;}
+  h1{font-size:1.35rem;}
+  h2{font-size:1.1rem;}
+  .toolbar .brand{font-size:.8rem;}
+}
+
+/* ---------- Impresión ---------- */
+@media print{
+  @page{size:A4 portrait;margin:14mm 12mm;}
+  html,body{
+    background:#fff !important;color:#000 !important;
+    padding:0 !important;margin:0 !important;font-size:11pt !important;
+    box-shadow:none !important;
+  }
+  .toolbar,.tabs,.to-top,.copyBtn,.progress-bar,nav,.search-hl,.toast,.print-warn,.no-print{
+    display:none !important;
+  }
+  main{max-width:100% !important;padding:0 !important;margin:0 !important;}
+  .panel{
+    display:block !important;
+    page-break-after:auto !important;
+    animation:none !important;
+    border:none !important;box-shadow:none !important;
+    background:#fff !important;color:#000 !important;
+    padding:0 !important;margin:0 0 10pt 0 !important;
+  }
+  .card,.box,.table-wrap,table,th,td,pre,.code-wrap,.flow,.gloss .item,.meta-item,.checklist li{
+    background:#fff !important;color:#000 !important;
+    border-color:#999 !important;box-shadow:none !important;
+  }
+  th{background:#e5e7eb !important;color:#000 !important;}
+  pre,table{overflow:visible !important;white-space:pre-wrap !important;word-break:break-word !important;}
+  pre{font-size:9pt !important;border:1px solid #999 !important;}
+  a{color:#000 !important;text-decoration:underline !important;}
+  .hero-title,.credit-author,.toolbar .brand{
+    background:none !important;-webkit-background-clip:border-box !important;background-clip:border-box !important;
+    color:#000 !important;-webkit-text-fill-color:#000 !important;
+  }
+  h1,h2,h3,h4{color:#000 !important;page-break-after:avoid;}
+  h2{border-bottom:1px solid #999 !important;}
+  .hero-svg-mount{display:block !important;border:1px solid #999 !important;background:#fff !important;}
+  .hero-svg-mount svg,.hero-svg-mount img{max-width:100% !important;height:auto !important;}
+  .flow-node{background:#f1f5f9 !important;color:#000 !important;border:1px solid #999 !important;}
+  .flow-arrow{color:#000 !important;}
+  details{display:block !important;border:1px solid #999 !important;background:#fff !important;}
+  details > summary{list-style:none;color:#000 !important;}
+  code{background:#eee !important;color:#000 !important;border:1px solid #ccc !important;}
+  .gloss .item b,.box .lbl{color:#000 !important;}
+  .gloss .item span{color:#333 !important;}
+  .credit-role,.hero-sub,.hero-caption,.meta-item .k{color:#333 !important;}
+  .checklist input[type=checkbox]{accent-color:#000;}
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" aria-hidden="true"><div class="progress-bar-fill" id="progressFill"></div></div>
+
+<header class="toolbar">
+  <span class="brand">HERMES AGENT · TUTORIAL</span>
+  <input type="search" id="searchInput" placeholder="Buscar en el tutorial…" aria-label="Buscar en el tutorial">
+  <button class="btn icon" id="fontDown" title="Reducir tamaño del texto" aria-label="Reducir texto">A−</button>
+  <button class="btn icon" id="fontUp" title="Aumentar tamaño del texto" aria-label="Aumentar texto">A+</button>
+  <button class="btn" id="themeToggle" title="Cambiar modo claro/oscuro">Modo claro</button>
+  <button class="btn" id="printBtn" title="Imprimir o guardar como PDF">Imprimir / PDF</button>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Secciones del tutorial">
+  <button class="tab active" role="tab" data-tab="inicio" aria-selected="true">INICIO</button>
+  <button class="tab" role="tab" data-tab="conceptos" aria-selected="false">CONCEPTOS</button>
+  <button class="tab" role="tab" data-tab="procedimiento" aria-selected="false">PROCEDIMIENTO</button>
+  <button class="tab" role="tab" data-tab="practica" aria-selected="false">PRÁCTICA</button>
+  <button class="tab" role="tab" data-tab="errores" aria-selected="false">ERRORES</button>
+  <button class="tab" role="tab" data-tab="resumen" aria-selected="false">RESUMEN</button>
+  <button class="tab" role="tab" data-tab="fuentes" aria-selected="false">FUENTES</button>
+  <button class="tab" role="tab" data-tab="creditos" aria-selected="false">CRÉDITOS</button>
+</nav>
+
+<main>
+
+<!-- ==================== INICIO ==================== -->
+<section class="panel active" id="p-inicio" role="tabpanel" aria-label="Inicio">
+
+  <div class="hero-svg-mount" data-svg-hero="true" role="img" aria-label="Diagrama animado: un agente principal reparte el trabajo entre tres sub-agentes y recibe sus resultados"></div>
+  <p class="hero-caption">El agente principal reparte el trabajo entre sub-agentes y ensambla los resultados.</p>
+
+  <h1 class="hero-title">Guía Práctica de Hermes Agent</h1>
+  <p class="hero-sub">Automatización inteligente con sub-agentes y tareas programadas — sin escribir código.</p>
+
+  <div class="box imp">
+    <span class="lbl">Qué vas a conseguir</span>
+    Al terminar este tutorial tendrás un <strong>asistente digital propio</strong> funcionando en un servidor las 24 horas, capaz de repartir el trabajo entre varios ayudantes (sub-agentes) y de ejecutar tareas solo, a la hora que le digas, avisándote por Telegram.
+  </div>
+
+  <h2>¿Qué vas a aprender?</h2>
+  <ul>
+    <li>Qué es <strong>Hermes Agent</strong> y en qué se diferencia de un chatbot normal.</li>
+    <li>Cómo instalarlo de forma <strong>segura</strong> en un servidor aparte (VPS).</li>
+    <li>Cómo conectarle un <strong>modelo de inteligencia artificial</strong> (Claude, GPT u otro).</li>
+    <li>Cómo usar la <strong>Web UI</strong> para manejarlo con botones en lugar de comandos.</li>
+    <li>Cómo pedirle que <strong>delegue en sub-agentes</strong> cuando el trabajo es grande.</li>
+    <li>Cómo crear <strong>tareas programadas (crons)</strong> con <strong>continuidad</strong> para que no repitan información.</li>
+    <li>Cómo montar un <strong>flujo automático real</strong>: revisión diaria de solicitudes de presupuesto con borradores redactados por sub-agentes.</li>
+  </ul>
+
+  <h2>¿Para qué sirve?</h2>
+  <p>Está pensado para <strong>emprendedores, autónomos y profesionales sin conocimientos técnicos avanzados</strong> que quieren dejar de hacer a mano tareas repetitivas: resúmenes diarios, revisión de solicitudes, borradores de documentos, seguimiento de noticias, etc.</p>
+  <p>No necesitas saber programar. Sí necesitarás <strong>copiar y pegar algunos comandos</strong> tal cual, y aquí te explicaré qué hace cada uno.</p>
+
+  <h2>¿Qué necesitas antes de empezar?</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Necesitas</th><th>Para qué</th></tr></thead>
+      <tbody>
+        <tr><td>Una cuenta en un proveedor de <strong>VPS</strong></td><td>Un ordenador alquilado, encendido 24 h en un centro de datos</td></tr>
+        <tr><td>Una <strong>clave API</strong> de un proveedor de IA</td><td>Anthropic (Claude), OpenAI (GPT), OpenRouter u otro</td></tr>
+        <tr><td>Una cuenta de <strong>Telegram</strong> en tu móvil</td><td>Recibir avisos y dar órdenes al agente</td></tr>
+        <tr><td>Entre <strong>1 y 2 horas</strong> tranquilas</td><td>Hacer la primera configuración con calma</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Objetivos del tutorial</h2>
+  <ol>
+    <li>Entender los conceptos clave antes de tocar nada.</li>
+    <li>Instalar Hermes Agent en un entorno separado y seguro.</li>
+    <li>Conectarle un modelo de lenguaje y fijar un límite de gasto.</li>
+    <li>Aprender a delegar trabajo en sub-agentes con encargos claros.</li>
+    <li>Programar tareas diarias con continuidad y avisos por Telegram.</li>
+    <li>Montar tu primer flujo automático completo y probarlo.</li>
+  </ol>
+
+  <h2>Cómo utilizar este tutorial</h2>
+  <div class="card">
+    <ol>
+      <li><strong>Lee primero CONCEPTOS.</strong> Ahí están las palabras que se usan después (agente, sub-agente, cron, contexto…).</li>
+      <li><strong>Sigue PROCEDIMIENTO en orden.</strong> Cada paso depende del anterior. No te salte ninguno.</li>
+      <li><strong>Practica en PRÁCTICA.</strong> Ahí tienes las plantillas de prompt listas para copiar.</li>
+      <li><strong>Consulta ERRORES cuando algo falle.</strong> Casi todo lo que puede salir mal está ahí.</li>
+      <li><strong>Repasa RESUMEN</strong> antes de dar el flujo por terminado.</li>
+    </ol>
+  </div>
+
+  <div class="box tip">
+    <span class="lbl">Consejo</span>
+    Usa la barra de búsqueda de arriba para encontrar cualquier término al instante. Los botones <strong>A−</strong> y <strong>A+</strong> cambian el tamaño del texto y el botón <strong>Imprimir / PDF</strong> genera un documento completo con todas las pestañas.
+  </div>
+
+</section>
+
+<!-- ==================== CONCEPTOS ==================== -->
+<section class="panel" id="p-conceptos" role="tabpanel" aria-label="Conceptos">
+
+  <h1>Conceptos clave</h1>
+  <p>Antes de instalar nada conviene entender <strong>qué es cada cosa</strong>. Aquí tienes las ideas explicadas como si nunca hubieras oído hablar de ellas.</p>
+
+  <h2>1. ¿Qué es Hermes Agent?</h2>
+  <div class="card">
+    <p>Imagina que contratas a un <strong>asistente virtual que, en lugar de trabajar solo, dirige a un pequeño equipo de empleados digitales</strong>. Tú le explicas en lenguaje normal lo que necesitas; él decide si lo hace por sí mismo o si reparte el trabajo entre varios ayudantes, y al final te entrega todo ordenado.</p>
+    <p>Eso es, en esencia, <strong>Hermes Agent</strong>: un agente de inteligencia artificial de <strong>código abierto</strong> creado por <strong>Nous Research</strong>.</p>
+  </div>
+
+  <h3>Un agente no es un chat</h3>
+  <p>Un <em>agente</em> es un programa que no se limita a responder preguntas: <strong>actúa</strong>. Abre archivos, ejecuta tareas en un servidor, busca información y te envía los resultados.</p>
+
+  <h3>Sus cuatro rasgos principales</h3>
+  <div class="gloss">
+    <div class="item"><b>Vive en tu propio servidor</b><span>Puedes hablar con él desde un terminal, desde un panel web o desde aplicaciones de mensajería como Telegram.</span></div>
+    <div class="item"><b>Recuerda lo que aprende</b><span>Guarda notas y procedimientos para no tener que explicarle las cosas dos veces.</span></div>
+    <div class="item"><b>Trabaja mientras duermes</b><span>Incluye un programador de tareas que se ejecuta aunque tú estés desconectado.</span></div>
+    <div class="item"><b>Usa el modelo que tú elijas</b><span>Funciona con un LLM (Claude, GPT…) que tú conectas y controlas.</span></div>
+  </div>
+
+  <h2>2. Vocabulario esencial</h2>
+  <div class="gloss">
+    <div class="item"><b>API / clave API</b><span>La «puerta» (API) por la que un programa habla con otro, y la «contraseña» (clave) que da acceso a ella. Con ella Hermes usa el modelo de IA a tu cargo.</span></div>
+    <div class="item"><b>LLM (Large Language Model)</b><span>Modelo de lenguaje de gran tamaño; el «cerebro» de IA que entiende y redacta texto (por ejemplo, Claude o GPT).</span></div>
+    <div class="item"><b>Prompt</b><span>El texto con el que le das instrucciones al agente.</span></div>
+    <div class="item"><b>Contexto</b><span>Todo lo que el agente tiene presente en un momento dado (tus mensajes, archivos leídos, resultados). Cuanto más largo, más se satura.</span></div>
+    <div class="item"><b>Sub-agente</b><span>Ayudante creado por el agente principal para una tarea concreta, con contexto limpio y su propio terminal.</span></div>
+    <div class="item"><b>Cron</b><span>Tarea programada que se ejecuta sola a una hora o con una frecuencia fijas. Una «alarma inteligente» que además trabaja.</span></div>
+    <div class="item"><b>Continuidad</b><span>Función de las tareas programadas que entrega a cada ejecución el resultado de la anterior, para evitar repeticiones.</span></div>
+    <div class="item"><b>Gateway</b><span>La parte de Hermes que lo conecta con aplicaciones como Telegram, Discord o Slack.</span></div>
+    <div class="item"><b>VPS (Virtual Private Server)</b><span>Servidor privado virtual; un ordenador que alquilas, encendido las 24 horas en un centro de datos.</span></div>
+    <div class="item"><b>SSH (Secure Shell)</b><span>Forma cifrada de manejar un servidor remoto escribiendo comandos desde tu ordenador.</span></div>
+    <div class="item"><b>Túnel SSH</b><span>Conexión cifrada y privada entre tu ordenador y el servidor, que permite abrir el panel web sin exponerlo a internet.</span></div>
+    <div class="item"><b>Web UI (User Interface)</b><span>Panel con botones y ventanas en tu navegador para manejar el agente sin escribir todo en el terminal.</span></div>
+    <div class="item"><b>Telegram Bot</b><span>Cuenta automática de Telegram que Hermes usa para escribirte y recibir tus mensajes.</span></div>
+  </div>
+
+  <h2>3. Agente principal frente a sub-agentes</h2>
+  <p>Cuando le pides algo complejo, el <strong>agente principal</strong> puede crear <strong>sub-agentes</strong>: copias de trabajo con un encargo concreto. El principal actúa como <strong>director de orquesta</strong>; los sub-agentes son los <strong>especialistas</strong>.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Característica</th><th>Agente principal</th><th>Sub-agentes</th></tr></thead>
+      <tbody>
+        <tr><td>Papel</td><td>Director de orquesta: entiende tu petición, reparte y ensambla</td><td>Especialistas: hacen una tarea concreta</td></tr>
+        <tr><td>Habla contigo</td><td>Sí, puede hacerte preguntas</td><td>No: no pueden consultarte nada</td></tr>
+        <tr><td>Memoria</td><td>Conserva lo aprendido en tus conversaciones</td><td>Empiezan «en blanco» y no usan la memoria persistente</td></tr>
+        <tr><td>Terminal</td><td>El suyo</td><td>Cada uno trabaja en su propia sesión de terminal independiente</td></tr>
+        <tr><td>Mensajería</td><td>Puede enviarte mensajes (por ejemplo, a Telegram)</td><td>No pueden enviar mensajes por su cuenta</td></tr>
+        <tr><td>Modelo de IA</td><td>El que hayas configurado</td><td>Por defecto el mismo; opcionalmente uno más barato para tareas simples</td></tr>
+        <tr><td>Duración</td><td>Sin límite fijo</td><td>Tienen un límite de pasos por tarea (50 por defecto)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="box note">
+    <span class="lbl">Nota</span>
+    Por defecto, un sub-agente <strong>no puede crear a su vez nuevos sub-agentes</strong>: la delegación llega solo hasta un nivel. Existe una opción avanzada de «orquestadores» para casos más complejos, que queda fuera de esta guía.
+  </div>
+
+  <h2>4. La ventaja de los contextos independientes</h2>
+  <p>Cada sub-agente empieza con un contexto <strong>limpio</strong>. Eso tiene dos consecuencias:</p>
+  <div class="gloss">
+    <div class="item"><b>A favor</b><span>El chat principal no se llena de detalles de trabajo intermedio, y cada especialista se concentra solo en su parte sin ideas heredadas.</span></div>
+    <div class="item"><b>A tener en cuenta</b><span>Un sub-agente no sabe nada de tu conversación. Solo conoce el objetivo y la información que el agente principal le pase al crearlo.</span></div>
+  </div>
+  <div class="box imp">
+    <span class="lbl">Regla de oro</span>
+    Pide al agente que dé a cada sub-agente <strong>toda la información que necesita</strong> (qué hacer, para quién, qué datos usar, dónde guardar el resultado). Un encargo como «arregla el error» no sirve; uno como «revisa el archivo X, corrige el error de la línea 40 y guarda el resultado en Y» sí.
+  </div>
+
+  <h2>5. ¿Cuántos sub-agentes a la vez?</h2>
+  <p>Por defecto, Hermes ejecuta <strong>hasta 3 sub-agentes en paralelo</strong> por cada reparto de tareas. Es un valor configurable en <code>~/.hermes/config.yaml</code>:</p>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>delegation:
+  max_concurrent_children: 3</pre>
+  </div>
+  <p>Puedes subirlo (por ejemplo, a 5 o a 10) si tu servidor y tu presupuesto lo permiten. Si el agente intenta repartir más tareas que el límite, Hermes devuelve un <strong>error</strong> en lugar de recortarlas en silencio, así que sabrás que debes dividir el encargo o subir el valor.</p>
+  <div class="box warn">
+    <span class="lbl">Atención</span>
+    Más sub-agentes a la vez significa <strong>más gasto</strong> en el modelo de IA (cada uno consume su propia cuota) y más riesgo de que dos de ellos intenten modificar el mismo archivo. Empieza con 3 y sube solo si lo necesitas.
+  </div>
+
+  <h2>6. El problema de los duplicados y la continuidad</h2>
+  <p><strong>El fallo tradicional.</strong> Una tarea programada sin memoria de lo que hizo ayer es como un empleado que cada mañana empieza sin recordar nada: te envía la misma noticia dos días seguidos, responde otra vez al mismo correo o vuelve a procesar una solicitud que ya estaba atendida.</p>
+  <p><strong>La solución: continuidad.</strong> Hermes ofrece una función de <em>continuity</em>. Al activarla en una tarea, cada ejecución recibe como contexto <strong>el resultado de su propia ejecución anterior</strong>.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Situación</th><th>Sin continuidad</th><th>Con continuidad</th></tr></thead>
+      <tbody>
+        <tr><td>Noticias del día</td><td>Puede repetir las de ayer</td><td>Compara con lo enviado y omite lo repetido</td></tr>
+        <tr><td>Correos o solicitudes</td><td>Puede volver a procesar la misma</td><td>Reconoce lo ya tratado en la ejecución anterior</td></tr>
+        <tr><td>Coste de contexto</td><td>Menor</td><td>Algo mayor (se añade el resultado anterior)</td></tr>
+        <tr><td>Mensajes redundantes</td><td>Frecuentes</td><td>Reducidos</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="box imp">
+    <span class="lbl">Importante</span>
+    La continuidad <strong>no es magia</strong>: le entrega al agente el resultado anterior, pero es tu instrucción la que debe pedirle que lo compare («no repitas nada de lo que ya enviaste»). Por eso el prompt de la tarea incluye siempre una «regla de continuidad».
+  </div>
+
+  <h2>7. ¿Por qué un VPS y no tu ordenador?</h2>
+  <p>Un agente no es un chat inofensivo: <strong>puede ejecutar comandos y leer o escribir archivos</strong>. Si lo instalas en tu ordenador personal, tiene el mismo alcance que tú: tus documentos, tus fotos, tus contraseñas guardadas en el navegador.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Aspecto</th><th>Ejecución local (tu ordenador)</th><th>Ejecución en VPS (servidor aparte)</th></tr></thead>
+      <tbody>
+        <tr><td>Acceso a tus archivos personales</td><td>Total: ve lo mismo que tú</td><td>Ninguno: solo ve lo que instales en el servidor</td></tr>
+        <tr><td>Si el agente se equivoca</td><td>Puede afectar a tus documentos</td><td>El daño queda limitado al servidor, que se puede reiniciar</td></tr>
+        <tr><td>Tareas programadas</td><td>Solo funcionan con el ordenador encendido</td><td>Funcionan 24 horas, aunque duermas</td></tr>
+        <tr><td>Privacidad</td><td>Mezcla tu vida personal y el agente</td><td>Entorno separado y limpio</td></tr>
+        <tr><td>Coste</td><td>Gratis (salvo el modelo de IA)</td><td>Cuota mensual del servidor (normalmente pocos euros)</td></tr>
+        <tr><td>Dificultad inicial</td><td>Baja</td><td>Media (esta guía te acompaña)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="box warn">
+    <span class="lbl">Advertencia</span>
+    No instales un agente con capacidad de ejecutar comandos en el mismo ordenador donde guardas documentos personales, fotos o gestores de contraseñas. Un servidor aparte es la forma más sencilla de mantener la separación.
+  </div>
+
+  <h2>8. Mapa de lo que vas a construir</h2>
+  <div class="flow">
+    <div class="flow-node hl">Tú (móvil o navegador)</div>
+    <div class="flow-arrow">↓ mensajes / panel</div>
+    <div class="flow-row">
+      <div class="flow-node">Telegram</div>
+      <div class="flow-node">Web UI</div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-node hl">Agente principal</div>
+    <div class="flow-arrow">↓ delega</div>
+    <div class="flow-row">
+      <div class="flow-node">Sub-agente 1</div>
+      <div class="flow-node">Sub-agente 2</div>
+      <div class="flow-node">Sub-agente 3</div>
+    </div>
+    <div class="flow-arrow">↑ resultados</div>
+    <div class="flow-node">Agente principal ensambla</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-node hl">Resumen final por Telegram</div>
+    <div class="flow-arrow">↑ dispara a su hora</div>
+    <div class="flow-node">Tareas programadas (Cron)</div>
+  </div>
+
+  <h2>9. Resumen de conceptos</h2>
+  <div class="card">
+    <ul>
+      <li>Hermes Agent es un <strong>agente</strong>, no un chat: actúa sobre archivos, servidor y mensajería.</li>
+      <li>El <strong>agente principal</strong> reparte el trabajo entre <strong>sub-agentes</strong> con contexto limpio.</li>
+      <li>Los sub-agentes <strong>no saben nada</strong> de tu conversación: hay que darles todo el contexto en el encargo.</li>
+      <li>Los <strong>crons</strong> ejecutan tareas solas; la <strong>continuidad</strong> evita que repitan información.</li>
+      <li>Todo esto vive en un <strong>VPS</strong> aparte, para no mezclarlo con tus archivos personales.</li>
+    </ul>
+  </div>
+
+</section>
+
+<!-- ==================== PROCEDIMIENTO ==================== -->
+<section class="panel" id="p-procedimiento" role="tabpanel" aria-label="Procedimiento">
+
+  <h1>Procedimiento paso a paso</h1>
+  <p>Sigue los pasos en orden. Cada uno depende del anterior. Copia los comandos tal cual, cambiando solo lo que está entre <code>MAYÚSCULAS</code>.</p>
+
+  <!-- ---------- BLOQUE 1: INSTALACIÓN ---------- -->
+  <h2>Bloque 1 · Instalación segura en un VPS</h2>
+
+  <h3>Objetivo</h3>
+  <p>Tener Hermes Agent funcionando en un servidor aparte, con un usuario propio, cortafuegos activo y sin acceso a tus archivos personales.</p>
+
+  <h3>Explicación sencilla</h3>
+  <p>Vas a alquilar un ordenador en un centro de datos (VPS), entrar en él con una consola segura (SSH) y ejecutar un instalador. Antes de instalar, crearás un usuario propio (no usarás <code>root</code>, que tiene poderes absolutos) y activarás un cortafuegos.</p>
+
+  <h4>Paso 1.1 — Contrata el VPS</h4>
+  <ol>
+    <li>Entra en el panel web de tu proveedor de VPS.</li>
+    <li>Crea un servidor nuevo con el sistema <strong>Ubuntu</strong> (versión LTS, de soporte prolongado).</li>
+    <li>Elige como referencia <strong>2 núcleos de procesador y 4 GB de memoria</strong>. Es suficiente para empezar.</li>
+    <li>Anota la <strong>dirección IP</strong> que te asignen y la contraseña o clave de acceso.</li>
+  </ol>
+  <p><strong>Resultado esperado:</strong> tienes una IP y unas credenciales en la mano.</p>
+
+  <h4>Paso 1.2 — Conéctate al servidor por SSH</h4>
+  <p>Abre el terminal de tu ordenador (en Windows, <em>PowerShell</em>; en Mac, <em>Terminal</em>) y escribe, cambiando la IP por la tuya:</p>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>ssh root@IP_DE_TU_SERVIDOR</pre>
+  </div>
+  <p><strong>Por qué:</strong> SSH es una forma cifrada de manejar el servidor escribiendo comandos desde tu ordenador.</p>
+  <p><strong>Resultado esperado:</strong> aparece un mensaje pidiendo la contraseña y entras en el servidor.</p>
+  <p><strong>Si algo sale mal:</strong> comprueba que has copiado bien la IP y que el proveedor tiene el puerto 22 abierto.</p>
+
+  <h4>Paso 1.3 — Crea un usuario propio para el agente</h4>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>adduser hermes
+usermod -aG sudo hermes</pre>
+  </div>
+  <p><strong>Por qué:</strong> no conviene usar el usuario <code>root</code>, que tiene poderes absolutos. Si el agente se equivoca, el daño queda limitado.</p>
+  <p><strong>Resultado esperado:</strong> se crea el usuario <code>hermes</code> con permisos de administración.</p>
+
+  <h4>Paso 1.4 — Activa el cortafuegos</h4>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>ufw allow OpenSSH
+ufw enable</pre>
+  </div>
+  <p><strong>Por qué:</strong> el cortafuegos bloquea las conexiones no deseadas y deja abierto solo el acceso SSH.</p>
+  <p><strong>Resultado esperado:</strong> el cortafuegos queda activo y sigues conectado.</p>
+  <div class="box warn">
+    <span class="lbl">Atención</span>
+    Si activas el cortafuegos <strong>antes</strong> de permitir OpenSSH, te quedarás fuera del servidor. Respeta el orden: primero <code>allow OpenSSH</code>, después <code>enable</code>.
+  </div>
+
+  <h4>Paso 1.5 — Entra con el nuevo usuario</h4>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>su - hermes</pre>
+  </div>
+  <p><strong>Resultado esperado:</strong> el prompt cambia y ahora eres <code>hermes</code>.</p>
+
+  <h4>Paso 1.6 — Instala Hermes Agent</h4>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash</pre>
+  </div>
+  <p><strong>Por qué:</strong> es el instalador oficial publicado por Nous Research.</p>
+  <p><strong>Resultado esperado:</strong> el instalador descarga y prepara Hermes en el servidor.</p>
+  <div class="box tip">
+    <span class="lbl">Buena costumbre</span>
+    Si quieres ver qué hace un instalador antes de ejecutarlo, descárgalo primero sin ejecutarlo (<code>curl -fsSL URL -o install.sh</code>) y ábrelo con <code>less install.sh</code>.
+  </div>
+
+  <h4>Paso 1.7 — Comprueba y arranca</h4>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>hermes doctor
+hermes</pre>
+  </div>
+  <p><strong>Por qué:</strong> <code>hermes doctor</code> es la herramienta de diagnóstico; <code>hermes</code> arranca el agente.</p>
+  <p><strong>Resultado esperado:</strong> el diagnóstico no señala problemas graves y el agente responde.</p>
+  <div class="box note">
+    <span class="lbl">Nota</span>
+    Los comandos anteriores son los habituales de Ubuntu y el instalador oficial. Si tu proveedor ofrece una plantilla «lista para usar» de Hermes Agent, puedes usarla, pero conviene que revises igualmente el usuario, el cortafuegos y las claves.
+  </div>
+
+  <!-- ---------- BLOQUE 2: MODELOS ---------- -->
+  <h2>Bloque 2 · Conexión de modelos de inteligencia artificial</h2>
+
+  <h3>Objetivo</h3>
+  <p>Darle a Hermes un «cerebro» con el que pensar: un modelo de lenguaje (Claude, GPT u otro) conectado mediante una clave API.</p>
+
+  <h4>Paso 2.1 — Obtén tu clave API</h4>
+  <ol>
+    <li>Entra en la web del proveedor que elijas (Anthropic, OpenAI, OpenRouter, el portal de Nous Research…).</li>
+    <li>Busca la sección <strong>«API keys»</strong> de tu cuenta.</li>
+    <li>Crea una clave nueva y <strong>cópiala en ese momento</strong>: muchos proveedores solo la muestran una vez.</li>
+    <li>Guárdala en un lugar seguro (gestor de contraseñas).</li>
+  </ol>
+
+  <h4>Paso 2.2 — Ejecuta el asistente de configuración</h4>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>hermes setup</pre>
+  </div>
+  <p><strong>Resultado esperado:</strong> aparece un cuestionario en pantalla.</p>
+
+  <h4>Paso 2.3 — Elige proveedor y modelo</h4>
+  <ol>
+    <li>Sigue las preguntas del asistente.</li>
+    <li>Elige el <strong>proveedor</strong> que quieres usar por defecto.</li>
+    <li>Elige el <strong>modelo</strong>.</li>
+    <li>Pega la clave cuando se te pida.</li>
+  </ol>
+  <p><strong>Dónde se guarda:</strong> Hermes guarda las claves en su carpeta de configuración (<code>~/.hermes/</code>), en un archivo de entorno reservado para ese fin.</p>
+
+  <h4>Paso 2.4 — Prueba la conexión</h4>
+  <ol>
+    <li>Escribe <code>hermes</code> para arrancar.</li>
+    <li>Saluda al agente con un mensaje sencillo.</li>
+  </ol>
+  <p><strong>Resultado esperado:</strong> el agente responde usando el modelo configurado.</p>
+
+  <div class="box warn">
+    <span class="lbl">Advertencia de seguridad</span>
+    Tu clave API es como la tarjeta de crédito del modelo: quien la tenga puede gastar a tu cargo. <strong>No la pegues nunca</strong> en chats, correos ni capturas de pantalla. Además, <strong>fija un límite de gasto mensual</strong> en el panel del proveedor antes de dejar tareas automáticas funcionando.
+  </div>
+
+  <div class="box note">
+    <span class="lbl">Si algo no encaja</span>
+    Si tu versión no reconoce <code>hermes setup</code>, escribe <code>hermes --help</code> para ver los comandos disponibles.
+  </div>
+
+  <!-- ---------- BLOQUE 3: WEB UI ---------- -->
+  <h2>Bloque 3 · Acceso al panel visual (Hermes Web UI)</h2>
+
+  <h3>Objetivo</h3>
+  <p>Tener un panel con ventanas y botones en el navegador para manejar Hermes sin escribir todo en el terminal.</p>
+
+  <div class="box imp">
+    <span class="lbl">Importante</span>
+    Hermes Agent ofrece de forma oficial su interfaz de terminal y una aplicación de escritorio. El panel web de navegador que usaremos aquí es <strong>Hermes WebUI, un proyecto de la comunidad</strong> (repositorio <code>nesquena/hermes-webui</code>). Funciona sobre tu agente y tus modelos ya instalados, sin configuración adicional, y está pensado para accederse de forma segura mediante un túnel SSH.
+  </div>
+
+  <h4>Paso 3.1 — Descarga el panel en el servidor</h4>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>git clone https://github.com/nesquena/hermes-webui.git hermes-webui
+cd hermes-webui</pre>
+  </div>
+
+  <h4>Paso 3.2 — Arráncalo siguiendo el README</h4>
+  <ol>
+    <li>Abre el archivo <code>README</code> del repositorio.</li>
+    <li>Localiza el comando de inicio y el <strong>puerto</strong> (el «número de puerta») que usa el panel.</li>
+    <li>Anota ese número: lo llamaremos <code>PUERTO</code>.</li>
+  </ol>
+
+  <h4>Paso 3.3 — Abre un túnel SSH desde tu ordenador</h4>
+  <p>En una ventana de terminal <strong>de tu ordenador</strong> (no del servidor), escribe:</p>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>ssh -L PUERTO:127.0.0.1:PUERTO hermes@IP_DE_TU_SERVIDOR</pre>
+  </div>
+  <p><strong>Por qué:</strong> un túnel es un «pasillo privado y cifrado» entre tu ordenador y el servidor. Mientras esté abierto, verás el panel como si estuviera en tu ordenador, pero solo tú puedes llegar a él.</p>
+
+  <h4>Paso 3.4 — Abre el panel en tu navegador</h4>
+  <ol>
+    <li>Con el túnel abierto, escribe en tu navegador: <code>http://localhost:PUERTO</code>.</li>
+    <li>Deberías ver el panel de Hermes WebUI.</li>
+  </ol>
+
+  <div class="box warn">
+    <span class="lbl">Advertencia</span>
+    No abras el puerto del panel al público en el cortafuegos. El túnel SSH existe precisamente para que nadie más pueda llegar a tu agente.
+  </div>
+
+  <h3>Recorrido por los elementos principales</h3>
+  <p>Los nombres pueden variar ligeramente según la versión.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Elemento</th><th>Para qué sirve</th></tr></thead>
+      <tbody>
+        <tr><td>Chat</td><td>Hablar con el agente principal y ver cómo trabaja (verás «tarjetas» con cada herramienta que usa)</td></tr>
+        <tr><td>Tareas (Tasks)</td><td>Ver, crear, editar, ejecutar, pausar, reanudar y borrar tareas programadas, con su historial de ejecuciones</td></tr>
+        <tr><td>Habilidades (Skills)</td><td>Procedimientos reutilizables que el agente guarda o que tú le instalas</td></tr>
+        <tr><td>Memoria (Memory)</td><td>Lo que el agente recuerda de ti y de tu entorno</td></tr>
+        <tr><td>Perfiles (Profiles)</td><td>Crear y cambiar entre configuraciones distintas del agente</td></tr>
+        <tr><td>Ajustes (Settings)</td><td>Modelos, proveedores y preferencias generales</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ---------- BLOQUE 4: SUB-AGENTES ---------- -->
+  <h2>Bloque 4 · Trabajar con sub-agentes (delegación multitarea)</h2>
+
+  <h3>Objetivo</h3>
+  <p>Conseguir que el agente principal reparta un trabajo complejo entre varios sub-agentes que trabajan en paralelo, y que después ensamble los resultados.</p>
+
+  <h3>Explicación sencilla</h3>
+  <p>Es como pedirle a un director de orquesta que reparta la partitura entre varios músicos. Cada músico toca su parte sin distraerse con las demás, y el director junta todo al final.</p>
+
+  <h4>Paso 4.1 — Pídele al agente principal que cree sub-agentes</h4>
+  <p>No hace falta ningún comando especial: Hermes decide la delegación según la complejidad, pero puedes pedirla expresamente con frases como:</p>
+  <ul>
+    <li>«hazlo en paralelo con sub-agentes»</li>
+    <li>«reparte este trabajo entre varios ayudantes»</li>
+  </ul>
+
+  <h4>Paso 4.2 — Define instrucciones claras para cada sub-agente</h4>
+  <p>Describe cada parte por separado y con todo lo necesario. Una estructura útil para cada encargo es:</p>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>Sub-agente [nombre]:
+- Objetivo: [qué debe conseguir]
+- Datos que debe usar: [información completa, no «lo que hablamos antes»]
+- Dónde guardar el resultado: [nombre de archivo o carpeta]
+- Qué NO debe tocar: [archivos o carpetas ajenos]</pre>
+  </div>
+  <p><strong>Por qué:</strong> un sub-agente empieza con contexto limpio: no sabe nada de tu conversación.</p>
+
+  <h4>Paso 4.3 — Observa el trabajo en paralelo</h4>
+  <ul>
+    <li><strong>En el terminal:</strong> escribe <code>/agents</code> para abrir la vista que muestra qué sub-agentes están activos y cómo avanzan.</li>
+    <li><strong>En la Web UI:</strong> sigue las tarjetas de actividad que van apareciendo en el chat.</li>
+  </ul>
+
+  <h4>Paso 4.4 — Recibe y ensambla los resultados</h4>
+  <ol>
+    <li>Cuando todos terminen, el agente principal recoge los resultados.</li>
+    <li>Te los presenta juntos.</li>
+    <li>Puedes pedirle que los <strong>compare</strong>, que <strong>elija el mejor</strong> o que los <strong>fusione</strong>.</li>
+  </ol>
+
+  <h3>Ejemplo práctico: tres variantes de una página web a la vez</h3>
+  <p>Copia este prompt, cambiando lo que está entre corchetes:</p>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>Quiero tres propuestas distintas de página de aterrizaje para mi negocio. Hazlo en paralelo con tres sub-agentes, uno por variante.
+
+Información del negocio (úsala completa en cada sub-agente):
+- Nombre: [NOMBRE DE TU NEGOCIO]
+- Qué ofrece: [DESCRIPCIÓN EN DOS FRASES]
+- Público: [A QUIÉN SE DIRIGE]
+- Acción que debe provocar la página: [POR EJEMPLO, «pedir presupuesto»]
+
+Reparto:
+- Sub-agente A: diseño sobrio y profesional. Guárdalo en ~/proyectos/landing/variante-a.html
+- Sub-agente B: diseño cálido y cercano, con colores vivos. Guárdalo en ~/proyectos/landing/variante-b.html
+- Sub-agente C: diseño minimalista de una sola pantalla. Guárdalo en ~/proyectos/landing/variante-c.html
+
+Cada sub-agente debe crear un único archivo HTML autónomo y no tocar los archivos de los demás.
+Cuando terminen, hazme una tabla comparativa con los puntos fuertes y débiles de cada variante y dime cuál recomiendas.</pre>
+  </div>
+  <div class="box tip">
+    <span class="lbl">Truco</span>
+    El mismo patrón sirve para repartir un proyecto en partes independientes (por ejemplo, la parte visible de una web, la lógica del servidor y la base de datos). Cuando dos partes necesitan modificar el mismo archivo, es mejor que el agente principal se encargue de ese archivo al final, tras el trabajo en paralelo.
+  </div>
+
+  <!-- ---------- BLOQUE 5: CRONS ---------- -->
+  <h2>Bloque 5 · Automatización continua con crons e historial</h2>
+
+  <h3>Objetivo</h3>
+  <p>Crear una tarea que se ejecute sola todos los días laborables a una hora fija, con continuidad activada y entrega de resultados por Telegram.</p>
+
+  <h3>Explicación sencilla</h3>
+  <p>Un <strong>cron</strong> es una alarma inteligente: una alarma normal solo suena; esta, cuando llega su hora, <strong>se pone a trabajar</strong> (busca información, redacta un resumen, revisa una carpeta) y te entrega el resultado.</p>
+  <p>En Hermes, los crons se ejecutan aunque tú estés desconectado y pueden entregar los resultados a plataformas como Telegram, Discord, Slack o correo electrónico.</p>
+
+  <h4>Paso 5.1 — Vincula Hermes con Telegram</h4>
+  <p>Un <strong>bot de Telegram</strong> es una cuenta automática de Telegram que Hermes usa para escribirte y para recibir tus mensajes.</p>
+  <ol>
+    <li>En Telegram, busca el contacto oficial <strong>@BotFather</strong> y envíale el mensaje <code>/newbot</code>.</li>
+    <li>Elige un nombre y un nombre de usuario (debe terminar en <code>bot</code>). BotFather te entregará un <strong>token</strong>, una clave larga que identifica a tu bot.</li>
+    <li>En el servidor, lanza el asistente de mensajería de Hermes y sigue sus preguntas:
+      <div class="code-wrap">
+        <button class="copyBtn" type="button">COPIAR</button>
+        <pre>hermes gateway setup
+hermes gateway start</pre>
+      </div>
+    </li>
+    <li>Cuando el asistente te lo pida, pega el token y, si te pregunta qué usuarios están autorizados, indica <strong>solo el tuyo</strong>.</li>
+    <li>Envía un mensaje a tu bot desde Telegram: debería responderte.</li>
+  </ol>
+  <div class="box warn">
+    <span class="lbl">Atención</span>
+    Si no limitas quién puede hablar con el bot, cualquier persona que lo encuentre podría darle órdenes a tu agente. Autoriza únicamente tu propia cuenta y no compartas el token.
+  </div>
+
+  <h4>Paso 5.2 — Crea un cron de monitoreo (resumen diario a las 8:00)</h4>
+  <p>La forma más sencilla es pedírselo al agente, por el chat de Telegram o por la Web UI:</p>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>Todos los días laborables a las 8:00 (hora de [TU CIUDAD]), busca las 5 noticias más importantes sobre [TU SECTOR] publicadas en las últimas 24 horas y envíame a Telegram un resumen de tres líneas por noticia, con su enlace.
+
+Regla de continuidad: antes de redactar, revisa el resultado de la ejecución anterior de esta tarea. No incluyas ninguna noticia que ya me enviaste. Si no hay nada nuevo, envíame solo el mensaje: «Sin novedades hoy».</pre>
+  </div>
+  <p>Si prefieres hacerlo con un comando, la forma general es (la sintaxis exacta puede variar; consulta <code>hermes cron create --help</code>):</p>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>hermes cron create "0 8 * * 1-5" "Resume las 5 noticias más importantes de [TU SECTOR]..." --continuity --deliver telegram</pre>
+  </div>
+  <div class="box note">
+    <span class="lbl">Hora del servidor</span>
+    Los servidores suelen funcionar con la hora universal (UTC), no con la de tu ciudad. Comprueba la hora del servidor con <code>timedatectl</code> y verifica con la primera entrega que la tarea llega a la hora esperada.
+  </div>
+
+  <h4>Paso 5.3 — Activa la continuidad (historial)</h4>
+  <p>Si creaste la tarea con la opción <code>--continuity</code> del paso anterior, ya está activa. Para activarla o desactivarla en una tarea existente:</p>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>hermes cron edit ID_DE_LA_TAREA --continuity
+hermes cron edit ID_DE_LA_TAREA --no-continuity</pre>
+  </div>
+  <p>También puedes pedírselo al agente en lenguaje normal:</p>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>Activa la continuidad en la tarea del resumen diario de noticias, para que cada ejecución tenga delante el resultado de la anterior.</pre>
+  </div>
+  <p>Y si tu versión de la Web UI muestra una casilla de continuidad o historial en el formulario de la tarea (panel <strong>Tareas</strong>), basta con marcarla.</p>
+  <div class="box tip">
+    <span class="lbl">Responder al cron desde Telegram</span>
+    Hermes permite que las entregas de las tareas programadas sean «continuables»: puedes responder a un mensaje del cron y seguir hablando con el agente con ese contexto. Se activa en <code>~/.hermes/config.yaml</code>:
+    <div class="code-wrap">
+      <button class="copyBtn" type="button">COPIAR</button>
+      <pre>cron:
+  mirror_delivery: true</pre>
+    </div>
+  </div>
+
+  <h4>Paso 5.4 — Pausa o detén una tarea desde Telegram</h4>
+  <p>Escribe al bot, con un mensaje simple, lo que quieres que haga con la tarea:</p>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>Pausa la tarea del resumen diario de noticias.</pre>
+  </div>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>Reanuda la tarea del resumen diario de noticias.</pre>
+  </div>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>Muéstrame la lista de mis tareas programadas.</pre>
+  </div>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>Elimina la tarea del resumen diario de noticias.</pre>
+  </div>
+  <p>La <strong>Web UI</strong> ofrece el mismo control con botones: en el panel <strong>Tareas</strong> puedes ver, ejecutar, pausar, reanudar y borrar cada tarea, y consultar su historial de ejecuciones.</p>
+  <div class="box warn">
+    <span class="lbl">En una emergencia</span>
+    Si una tarea envía mensajes sin parar o gasta demasiado, entra en el panel de tu proveedor de VPS y <strong>apaga el servidor</strong>. Después revisa la tarea con calma.
+  </div>
+
+  <h3>Cómo funciona la continuidad, en un vistazo</h3>
+  <div class="flow">
+    <div class="flow-node">Lunes 8:00 · Ejecución 1</div>
+    <div class="flow-arrow">↓ guarda su resultado</div>
+    <div class="flow-node">Resultado anterior</div>
+    <div class="flow-arrow">↓ se entrega como contexto</div>
+    <div class="flow-node">Martes 8:00 · Ejecución 2</div>
+    <div class="flow-arrow">↓ compara y descarta lo repetido</div>
+    <div class="flow-node hl">Envío solo con novedades</div>
+  </div>
+
+</section>
+
+<!-- ==================== PRÁCTICA ==================== -->
+<section class="panel" id="p-practica" role="tabpanel" aria-label="Práctica">
+
+  <h1>Proyecto integrador práctico</h1>
+  <p>Vamos a construir un flujo que, <strong>cada día laborable por la mañana</strong>, revisa las solicitudes de presupuesto recibidas, <strong>delega en un sub-agente la redacción de un borrador</strong> para cada una, y te avisa por Telegram con un resumen. Combina todo lo aprendido: cron, continuidad, sub-agentes y Telegram.</p>
+
+  <h2>El flujo</h2>
+  <div class="flow">
+    <div class="flow-node">Cron diario 8:30</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-node hl">Agente principal</div>
+    <div class="flow-arrow">↑ resultado de ayer (continuidad)</div>
+    <div class="flow-node">Solicitudes nuevas</div>
+    <div class="flow-arrow">↓ delega</div>
+    <div class="flow-row">
+      <div class="flow-node">Sub-agente (solicitud 1)</div>
+      <div class="flow-node">Sub-agente (solicitud 2)</div>
+      <div class="flow-node">Sub-agente (solicitud N)</div>
+    </div>
+    <div class="flow-arrow">↑ borradores</div>
+    <div class="flow-node">Agente principal ensambla</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-node hl">Telegram: resumen y avisos</div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-node">Tú revisas y apruebas</div>
+  </div>
+  <div class="box imp">
+    <span class="lbl">Regla de seguridad</span>
+    El flujo <strong>solo redacta borradores</strong>. Nunca envía nada a tus clientes sin que tú lo revises y lo apruebes. Mantén esa regla siempre, sobre todo mientras tomas confianza con la herramienta.
+  </div>
+
+  <h2>Elige tu variante de entrada</h2>
+  <div class="gloss">
+    <div class="item"><b>Variante A · con acceso a tu correo</b><span>El agente lee los correos de solicitud. Requiere que Hermes tenga una herramienta o habilidad de correo configurada. Pregúntale al agente: «¿Qué herramientas tienes disponibles para leer correo?».</span></div>
+    <div class="item"><b>Variante B · sin acceso al correo (más segura para empezar)</b><span>Tú reenvías o pegas las solicitudes en un archivo de una carpeta del servidor, y el agente trabaja solo con esa carpeta.</span></div>
+  </div>
+  <div class="box warn">
+    <span class="lbl">Si eliges la variante A</span>
+    Crea una cuenta de correo <strong>específica para el agente</strong>, con los mínimos permisos posibles, en lugar de darle acceso a tu correo principal.
+  </div>
+
+  <h2>Plantilla 1 · Preparar el espacio de trabajo</h2>
+  <p>Copia este prompt y pégalo en el chat del agente. Rellena lo que está entre corchetes.</p>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>Prepara el espacio de trabajo para mi flujo de presupuestos:
+1. Crea la carpeta ~/.hermes/data/presupuestos/ con tres subcarpetas: entrada, borradores y procesados.
+2. Crea el archivo tarifas.md dentro de ~/.hermes/data/presupuestos/ con este contenido:
+
+[PEGA AQUÍ TUS SERVICIOS Y PRECIOS, UNO POR LÍNEA. Ejemplo: «Diseño de logotipo: 250 €»]
+
+3. Crea el archivo estilo.md con estas normas de redacción: tono cercano pero profesional, tratamiento de usted, firma «[TU NOMBRE] – [TU NEGOCIO]», validez del presupuesto de 15 días.
+4. Cuando termines, muéstrame la estructura de carpetas creada.</pre>
+  </div>
+
+  <h2>Plantilla 2 · Prueba manual (antes de automatizar)</h2>
+  <p>Probar a mano evita sorpresas cuando la tarea se ejecute sola.</p>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>Voy a dejar en la carpeta entrada una solicitud de prueba: [PEGA AQUÍ UNA SOLICITUD REAL O INVENTADA].
+
+Haz lo siguiente:
+1. Lee las solicitudes de ~/.hermes/data/presupuestos/entrada/ que no estén en procesados.
+2. Para cada solicitud nueva, crea un sub-agente. Dale en su encargo TODO lo que necesita: el texto completo de la solicitud, el contenido completo de tarifas.md y de estilo.md, y el nombre del archivo donde debe guardar el borrador (en ~/.hermes/data/presupuestos/borradores/).
+3. Cada sub-agente redacta un borrador de presupuesto con conceptos, importes y total, usando solo los precios de tarifas.md. Si falta un dato para presupuestar, el borrador debe indicarlo claramente en un apartado «Datos pendientes», sin inventar precios.
+4. Cuando terminen, mueve cada solicitud tratada a la carpeta procesados.
+5. Resúmeme el resultado: cuántas solicitudes había, qué borradores se crearon y qué datos faltan.
+No envíes nada a ningún cliente.</pre>
+  </div>
+
+  <h2>Plantilla 3 · Crear la tarea diaria con continuidad</h2>
+  <p>Cuando la prueba manual salga bien:</p>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>Crea una tarea programada llamada «Presupuestos diarios» que se ejecute de lunes a viernes a las 8:30 (hora de [TU CIUDAD]) con la continuidad activada y entrega de resultados por Telegram.
+
+Cada ejecución debe:
+1. Revisar las solicitudes nuevas en ~/.hermes/data/presupuestos/entrada/ (variante B) [o en mi correo, variante A].
+2. Antes de empezar, leer el resultado de la ejecución anterior y no volver a tratar ninguna solicitud que ya aparezca allí como procesada.
+3. Crear un sub-agente por cada solicitud nueva, dándole todo el contexto necesario (texto de la solicitud, tarifas.md y estilo.md) y pidiéndole un borrador en ~/.hermes/data/presupuestos/borradores/.
+4. Enviarme por Telegram un resumen breve: número de solicitudes nuevas, nombre de cada borrador y datos pendientes.
+5. Si no hay solicitudes nuevas, enviarme solo: «Sin solicitudes nuevas hoy».
+
+Regla de seguridad: solo redactar borradores. No enviar nunca nada a clientes.</pre>
+  </div>
+
+  <h2>Plantilla 4 · Control desde Telegram</h2>
+  <p>Mensajes que puedes enviar a tu bot en cualquier momento:</p>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>Pausa la tarea «Presupuestos diarios».</pre>
+  </div>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>Ejecuta ahora la tarea «Presupuestos diarios» y dime qué ha hecho.</pre>
+  </div>
+  <div class="code-wrap">
+    <button class="copyBtn" type="button">COPIAR</button>
+    <pre>Reanuda la tarea «Presupuestos diarios».</pre>
+  </div>
+
+  <h2>Ejercicios prácticos</h2>
+
+  <details>
+    <summary>Ejercicio 1 · Reparte un trabajo en tres sub-agentes</summary>
+    <p><strong>Enunciado:</strong> tienes que preparar tres versiones de un mismo correo de bienvenida para tres tipos de cliente (particular, empresa pequeña, gran cuenta). Pide al agente que lo haga en paralelo con tres sub-agentes.</p>
+    <p><strong>Solución explicada:</strong> el error típico es escribir «hazme tres correos». Un sub-agente no sabe nada de tu conversación. El prompt correcto es:</p>
+    <div class="code-wrap">
+      <button class="copyBtn" type="button">COPIAR</button>
+      <pre>Reparte este trabajo entre tres sub-agentes en paralelo. Cada uno redacta un correo de bienvenida y lo guarda en ~/correos/bienvenida-[tipo].md
+
+Contexto común para los tres (úsalo completo en cada sub-agente):
+- Negocio: [TU NEGOCIO]
+- Qué ha contratado el cliente: [SERVICIO]
+- Tono: cercano pero profesional
+- Firma: [TU NOMBRE] – [TU NEGOCIO]
+
+- Sub-agente 1: cliente particular. Destaca la cercanía y el soporte directo.
+- Sub-agente 2: empresa pequeña. Destaca la rapidez de respuesta y el precio cerrado.
+- Sub-agente 3: gran cuenta. Destaca el gestor de cuenta dedicado y los informes periódicos.
+
+Cuando terminen, compáralos y dime cuál es más claro.</pre>
+    </div>
+  </details>
+
+  <details>
+    <summary>Ejercicio 2 · Evita duplicados en un cron</summary>
+    <p><strong>Enunciado:</strong> tienes un cron que revisa precios de la competencia y te avisa. Ayer te avisó de lo mismo que anteayer. ¿Cómo lo arreglas?</p>
+    <p><strong>Solución explicada:</strong> activa la <strong>continuidad</strong> y añade una <strong>regla de continuidad</strong> al prompt:</p>
+    <div class="code-wrap">
+      <button class="copyBtn" type="button">COPIAR</button>
+      <pre>Regla de continuidad: antes de redactar, revisa el resultado de la ejecución anterior. No me avises de ningún cambio que ya me hayas comunicado. Si no hay cambios nuevos, envíame solo: «Sin cambios hoy».</pre>
+    </div>
+    <p>Y actívala con <code>hermes cron edit ID_DE_LA_TAREA --continuity</code> o marcando la casilla en el panel <strong>Tareas</strong> de la Web UI.</p>
+  </details>
+
+  <details>
+    <summary>Ejercicio 3 · Protege tu clave API</summary>
+    <p><strong>Enunciado:</strong> un amigo te pide que le pegues en un chat la clave API de tu proveedor para que te ayude a configurarla. ¿Qué haces?</p>
+    <p><strong>Solución explicada:</strong> <strong>no la compartes por ningún canal</strong>. La clave API es como la tarjeta de crédito del modelo: quien la tenga puede gastar a tu cargo. Si crees que se ha filtrado, revócala en el panel del proveedor y crea una nueva. Y antes de dejar tareas automáticas funcionando, fija un <strong>límite de gasto mensual</strong>.</p>
+  </details>
+
+  <h2>Lista de comprobación final</h2>
+  <p>Marca cada casilla cuando lo hayas verificado. Tu progreso se guarda en este navegador.</p>
+  <ul class="checklist" id="checklistFinal">
+    <li><input type="checkbox" id="chk1" data-key="chk1"><label for="chk1">El VPS tiene usuario propio, cortafuegos activo y acceso por SSH.</label></li>
+    <li><input type="checkbox" id="chk2" data-key="chk2"><label for="chk2">Hermes responde en el terminal y has fijado un límite de gasto en el proveedor del modelo.</label></li>
+    <li><input type="checkbox" id="chk3" data-key="chk3"><label for="chk3">La Web UI solo se abre a través del túnel SSH.</label></li>
+    <li><input type="checkbox" id="chk4" data-key="chk4"><label for="chk4">El bot de Telegram solo responde a tu cuenta.</label></li>
+    <li><input type="checkbox" id="chk5" data-key="chk5"><label for="chk5">La prueba manual de los sub-agentes funcionó y los borradores son correctos.</label></li>
+    <li><input type="checkbox" id="chk6" data-key="chk6"><label for="chk6">La tarea diaria tiene la continuidad activada y llegó la primera entrega a la hora esperada.</label></li>
+    <li><input type="checkbox" id="chk7" data-key="chk7"><label for="chk7">Sabes pausar la tarea desde Telegram y desde el panel <strong>Tareas</strong>.</label></li>
+  </ul>
+
+</section>
+
+<!-- ==================== ERRORES ==================== -->
+<section class="panel" id="p-errores" role="tabpanel" aria-label="Errores">
+
+  <h1>Errores frecuentes y cómo corregirlos</h1>
+  <p>Casi todo lo que puede salir mal está aquí. Cuando algo no funcione, busca el síntoma en esta pestaña.</p>
+
+  <h2>1. Errores con sub-agentes</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Problema</th><th>Causa probable</th><th>Solución</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Un sub-agente hace algo distinto de lo esperado</td>
+          <td>Encargo demasiado vago; no sabe nada de tu conversación</td>
+          <td>Reescribe el encargo con todos los datos dentro</td>
+        </tr>
+        <tr>
+          <td>Error al repartir muchas tareas</td>
+          <td>Se supera el límite de sub-agentes simultáneos</td>
+          <td>Divide el encargo en lotes o sube <code>max_concurrent_children</code></td>
+        </tr>
+        <tr>
+          <td>Dos sub-agentes se pisan un archivo</td>
+          <td>Ambos tenían permiso para editar lo mismo</td>
+          <td>Asigna a cada uno archivos distintos</td>
+        </tr>
+        <tr>
+          <td>El gasto de IA se dispara</td>
+          <td>Demasiados sub-agentes o tareas muy largas</td>
+          <td>Reduce el paralelismo y usa un modelo más barato para tareas simples</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>El error más común: el encargo vacío</h3>
+  <div class="box">
+    <span class="lbl">Mal</span>
+    <code>«Arregla el error»</code>
+  </div>
+  <div class="box tip">
+    <span class="lbl">Bien</span>
+    <code>«Revisa el archivo X, corrige el error de la línea 40 y guarda el resultado en Y»</code>
+  </div>
+  <p><strong>Por qué:</strong> un sub-agente empieza en blanco. Solo conoce el objetivo y la información que el agente principal le pase al crearlo.</p>
+
+  <h2>2. Errores con tareas programadas y Telegram</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Problema</th><th>Causa probable</th><th>Solución</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>La tarea llega a una hora distinta de la esperada</td>
+          <td>El servidor trabaja en hora UTC, no en la de tu ciudad</td>
+          <td>Comprueba la hora con <code>timedatectl</code> y ajusta la expresión del cron</td>
+        </tr>
+        <tr>
+          <td>El agente repite la misma información dos días seguidos</td>
+          <td>La continuidad no está activada, o falta la regla de continuidad en el prompt</td>
+          <td>Activa <code>--continuity</code> y añade «no repitas nada de lo que ya enviaste»</td>
+        </tr>
+        <tr>
+          <td>El bot no responde</td>
+          <td>El gateway no está arrancado, o el token es incorrecto</td>
+          <td>Ejecuta <code>hermes gateway start</code> y revisa el token con BotFather</td>
+        </tr>
+        <tr>
+          <td>Cualquiera puede hablar con el bot</td>
+          <td>No se limitó la lista de usuarios autorizados</td>
+          <td>Autoriza solo tu cuenta en la configuración del gateway</td>
+        </tr>
+        <tr>
+          <td>No encuentro el comando exacto</td>
+          <td>La versión cambió el nombre del comando</td>
+          <td>Usa <code>hermes --help</code> y <code>hermes cron create --help</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>3. Errores de seguridad</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Riesgo</th><th>Qué puede pasar</th><th>Cómo evitarlo</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Instalar el agente en tu ordenador personal</td>
+          <td>El agente ve tus documentos, fotos y contraseñas</td>
+          <td>Usa siempre un VPS aparte</td>
+        </tr>
+        <tr>
+          <td>Usar el usuario <code>root</code></td>
+          <td>Un error del agente afecta a todo el sistema</td>
+          <td>Crea un usuario propio (<code>hermes</code>) con permisos limitados</td>
+        </tr>
+        <tr>
+          <td>Compartir la clave API</td>
+          <td>Cualquiera puede gastar a tu cargo</td>
+          <td>No la pegues en chats, correos ni capturas. Revócala si se filtra</td>
+        </tr>
+        <tr>
+          <td>Sin límite de gasto mensual</td>
+          <td>Una tarea en bucle puede disparar la factura</td>
+          <td>Fija un límite antes de dejar tareas automáticas</td>
+        </tr>
+        <tr>
+          <td>Abrir el puerto de la Web UI al público</td>
+          <td>Cualquiera puede llegar a tu agente</td>
+          <td>Accede siempre por túnel SSH</td>
+        </tr>
+        <tr>
+          <td>Dar acceso al correo principal</td>
+          <td>El agente lee correos que no debería</td>
+          <td>Crea una cuenta específica para el agente, con permisos mínimos</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>4. Errores al configurar el flujo de presupuestos</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Problema</th><th>Causa probable</th><th>Solución</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>El borrador inventa precios</td>
+          <td>El sub-agente no recibió el archivo <code>tarifas.md</code> completo</td>
+          <td>Incluye el contenido íntegro de <code>tarifas.md</code> y <code>estilo.md</code> en el encargo del sub-agente</td>
+        </tr>
+        <tr>
+          <td>Se vuelven a tratar solicitudes ya procesadas</td>
+          <td>Falta la continuidad o la carpeta <code>procesados</code> no se actualiza</td>
+          <td>Activa la continuidad y pide que mueva cada solicitud tratada a <code>procesados</code></td>
+        </tr>
+        <tr>
+          <td>El agente envía algo a un cliente</td>
+          <td>La regla de seguridad no era explícita</td>
+          <td>Añade siempre: «solo redactar borradores. No enviar nunca nada a clientes»</td>
+        </tr>
+        <tr>
+          <td>No hay ninguna solicitud y el agente se queda en blanco</td>
+          <td>Falta la instrucción de qué hacer cuando no hay trabajo</td>
+          <td>Añade: «Si no hay solicitudes nuevas, envíame solo: "Sin solicitudes nuevas hoy"»</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>5. Errores al usar este tutorial</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Problema</th><th>Causa probable</th><th>Solución</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>El PDF sale en blanco o recortado</td>
+          <td>Estás abriendo el HTML dentro de un visor con restricciones</td>
+          <td>Abre el archivo directamente en el navegador (Chrome, Edge, Firefox) y pulsa Ctrl+P / Cmd+P</td>
+        </tr>
+        <tr>
+          <td>El botón Imprimir no hace nada</td>
+          <td>El HTML está dentro de un iframe con <code>sandbox</code> sin <code>allow-modals</code></td>
+          <td>Abre el archivo directamente en el navegador, no dentro del visor</td>
+        </tr>
+        <tr>
+          <td>No encuentro un término</td>
+          <td>Está en otra pestaña</td>
+          <td>Usa el buscador de la barra superior: resalta las coincidencias en todas las pestañas</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</section>
+
+<!-- ==================== RESUMEN ==================== -->
+<section class="panel" id="p-resumen" role="tabpanel" aria-label="Resumen">
+
+  <h1>Resumen del tutorial</h1>
+
+  <h2>Capítulo 1 · Qué es Hermes Agent</h2>
+  <div class="card">
+    <ul>
+      <li>Es un <strong>agente</strong> de IA de código abierto creado por Nous Research, no un simple chat.</li>
+      <li>Vive en tu servidor, recuerda lo que aprende, trabaja mientras duermes y usa el modelo que tú elijas.</li>
+      <li>Está pensado para <strong>emprendedores, autónomos y profesionales sin conocimientos técnicos avanzados</strong>.</li>
+    </ul>
+  </div>
+
+  <h2>Capítulo 2 · Instalación segura</h2>
+  <div class="card">
+    <ul>
+      <li>Nunca lo instales en tu ordenador personal: usa un <strong>VPS aparte</strong>.</li>
+      <li>Crea un usuario propio, activa el cortafuegos y accede por <strong>SSH</strong>.</li>
+      <li>Conecta el modelo con <code>hermes setup</code> y fija un <strong>límite de gasto mensual</strong>.</li>
+      <li>Accede a la <strong>Web UI</strong> por túnel SSH, nunca abriendo el puerto al público.</li>
+    </ul>
+  </div>
+
+  <h2>Capítulo 3 · Sub-agentes</h2>
+  <div class="card">
+    <ul>
+      <li>El <strong>agente principal</strong> reparte el trabajo; los <strong>sub-agentes</strong> ejecutan cada parte.</li>
+      <li>Cada sub-agente tiene <strong>contexto limpio</strong>: no sabe nada de tu conversación.</li>
+      <li>Regla de oro: dale en el encargo <strong>toda la información</strong> que necesita.</li>
+      <li>Por defecto, hasta <strong>3 en paralelo</strong>, configurable en <code>config.yaml</code>.</li>
+    </ul>
+  </div>
+
+  <h2>Capítulo 4 · Crons y continuidad</h2>
+  <div class="card">
+    <ul>
+      <li>Un <strong>cron</strong> es una tarea programada que se ejecuta sola.</li>
+      <li>La <strong>continuidad</strong> entrega a cada ejecución el resultado de la anterior.</li>
+      <li>Para que funcione, tu prompt debe pedir explícitamente que <strong>compare y no repita</strong>.</li>
+      <li>Puedes pausar, reanudar o borrar tareas desde Telegram o desde el panel <strong>Tareas</strong>.</li>
+    </ul>
+  </div>
+
+  <h2>Capítulo 5 · Flujo integrador</h2>
+  <div class="card">
+    <ul>
+      <li>Cron diario → agente principal → sub-agentes por solicitud → borradores → resumen por Telegram.</li>
+      <li><strong>Regla de seguridad siempre:</strong> solo borradores, nunca envíos automáticos a clientes.</li>
+      <li>Prueba primero a mano, después automatiza.</li>
+    </ul>
+  </div>
+
+  <h2>Tabla de conceptos rápidos</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Concepto</th><th>En una frase</th></tr></thead>
+      <tbody>
+        <tr><td>Agente</td><td>Programa que actúa, no solo responde</td></tr>
+        <tr><td>Agente principal</td><td>El que entiende tu petición, reparte y ensambla</td></tr>
+        <tr><td>Sub-agente</td><td>Ayudante con contexto limpio y su propio terminal</td></tr>
+        <tr><td>Contexto</td><td>Todo lo que el agente tiene presente en un momento dado</td></tr>
+        <tr><td>Cron</td><td>Tarea programada que se ejecuta sola</td></tr>
+        <tr><td>Continuidad</td><td>Cada ejecución recibe el resultado de la anterior</td></tr>
+        <tr><td>VPS</td><td>Servidor alquilado, encendido 24 h</td></tr>
+        <tr><td>SSH</td><td>Consola cifrada para manejar el servidor</td></tr>
+        <tr><td>Túnel SSH</td><td>Pasillo privado para abrir la Web UI sin exponerla</td></tr>
+        <tr><td>Gateway</td><td>Puente entre Hermes y Telegram, Discord, Slack…</td></tr>
+        <tr><td>Prompt</td><td>El texto con el que das instrucciones al agente</td></tr>
+        <tr><td>LLM</td><td>El «cerebro» de IA que entiende y redacta texto</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Preguntas frecuentes</h2>
+
+  <details>
+    <summary>¿Necesito saber programar?</summary>
+    <p>No. Copiarás y pegarás algunos comandos tal cual, y aquí se explica qué hace cada uno. El resto se hace hablando con el agente en lenguaje normal.</p>
+  </details>
+
+  <details>
+    <summary>¿Cuánto cuesta tener esto funcionando?</summary>
+    <p>Dos cosas: la cuota mensual del VPS (normalmente pocos euros) y el consumo del modelo de IA. El segundo depende de cuántas tareas y sub-agentes uses. Por eso conviene fijar un <strong>límite de gasto mensual</strong> antes de dejar tareas automáticas.</p>
+  </details>
+
+  <details>
+    <summary>¿Puedo usar Hermes desde el móvil?</summary>
+    <p>Sí, mediante Telegram. El bot te escribe y tú le respondes. También puedes abrir la Web UI desde el navegador del móvil si tienes el túnel SSH configurado.</p>
+  </details>
+
+  <details>
+    <summary>¿Qué pasa si el agente se equivoca?</summary>
+    <p>Por eso vive en un VPS aparte: el daño queda limitado al servidor, que se puede reiniciar. Además, en el flujo de presupuestos, el agente solo redacta borradores: tú siempre revisas antes de enviar.</p>
+  </details>
+
+  <details>
+    <summary>¿Puedo tener varios perfiles de agente?</summary>
+    <p>Sí. La Web UI incluye un apartado <strong>Perfiles (Profiles)</strong> para crear y cambiar entre configuraciones distintas del agente.</p>
+  </details>
+
+  <details>
+    <summary>¿Los sub-agentes pueden crear más sub-agentes?</summary>
+    <p>Por defecto no. La delegación llega solo hasta un nivel. Existe una opción avanzada de «orquestadores» para casos más complejos, que queda fuera de esta guía.</p>
+  </details>
+
+  <details>
+    <summary>¿Qué hago si una tarea se vuelve loca y envía mensajes sin parar?</summary>
+    <p>Entra en el panel de tu proveedor de VPS y <strong>apaga el servidor</strong>. Después revisa la tarea con calma.</p>
+  </details>
+
+  <details>
+    <summary>¿La continuidad sustituye a mi instrucción?</summary>
+    <p>No. La continuidad le entrega al agente el resultado anterior, pero es tu instrucción la que debe pedirle que lo compare. Por eso el prompt de la tarea incluye siempre una «regla de continuidad».</p>
+  </details>
+
+</section>
+
+<!-- ==================== FUENTES ==================== -->
+<section class="panel" id="p-fuentes" role="tabpanel" aria-label="Fuentes">
+
+  <h1>Fuentes y puntos a verificar</h1>
+
+  <div class="box note">
+    <span class="lbl">Nota del autor</span>
+    Hermes Agent cambia con frecuencia. Estos puntos no se pudieron comprobar del todo en la documentación y conviene que los verifiques en tu instalación.
+  </div>
+
+  <h2>Puntos a verificar en tu instalación</h2>
+  <div class="card">
+    <ul>
+      <li><strong>Pausar desde Telegram:</strong> está confirmado que se puede pausar y reanudar desde el panel <strong>Tareas</strong> de la Web UI y que el agente gestiona sus propias tareas desde el chat. Prueba los mensajes del apartado de control desde Telegram y comprueba que funcionan en tu versión.</li>
+      <li><strong>Nombres exactos de comandos y pantallas</strong> (<code>hermes setup</code>, <code>hermes cron edit</code>, casilla de continuidad): pueden variar entre versiones. Usa <code>hermes --help</code> y <code>hermes cron create --help</code>.</li>
+      <li><strong>Número de sub-agentes simultáneos:</strong> el valor por defecto documentado es 3 y es configurable.</li>
+      <li><strong>Herramientas de correo</strong> (variante A del proyecto integrador): depende de las habilidades que tengas instaladas.</li>
+    </ul>
+  </div>
+
+  <h2>Fuentes consultadas</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Fuente</th><th>Dirección</th></tr></thead>
+      <tbody>
+        <tr><td>Repositorio oficial</td><td><code>github.com/NousResearch/hermes-agent</code></td></tr>
+        <tr><td>Documentación de tareas programadas (Cron)</td><td><code>hermes-agent.nousresearch.com/docs/user-guide/features/cron</code></td></tr>
+        <tr><td>Documentación de delegación en sub-agentes</td><td><code>hermes-agent.nousresearch.com/docs/user-guide/features/delegation</code></td></tr>
+        <tr><td>Patrones de delegación y trabajo en paralelo</td><td><code>hermes-agent.nousresearch.com/docs/guides/delegation-patterns</code></td></tr>
+        <tr><td>Panel web de la comunidad (Hermes WebUI)</td><td><code>github.com/nesquena/hermes-webui</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box imp">
+    <span class="lbl">Antes de continuar</span>
+    Esta guía se ha contrastado con la documentación oficial de Hermes Agent (Nous Research) en octubre de 2026. El proyecto evoluciona con rapidez: si el nombre de un botón o un comando no coincide exactamente con lo que ves, consulta la documentación oficial en <code>hermes-agent.nousresearch.com/docs</code>.
+  </div>
+
+</section>
+
+<!-- ==================== CRÉDITOS ==================== -->
+<section class="panel" id="p-creditos" role="tabpanel" aria-label="Créditos">
+
+  <h1>Créditos</h1>
+
+  <div class="hero-svg-mount" data-svg-hero="true" role="img" aria-label="Diagrama animado: un agente principal reparte el trabajo entre tres sub-agentes y recibe sus resultados"></div>
+  <p class="hero-caption">El mismo dibujo que abre el tutorial: delegación en sub-agentes.</p>
+
+  <div class="card">
+    <div class="credit-author">Rubén Sbarsky</div>
+    <div class="credit-role">Autor del tutorial</div>
+
+    <div class="meta-grid">
+      <div class="meta-item">
+        <span class="k">Fecha de creación</span>
+        <span class="v">02/10/2026</span>
+      </div>
+      <div class="meta-item">
+        <span class="k">Hora de creación</span>
+        <span class="v">14:30:00</span>
+      </div>
+      <div class="meta-item">
+        <span class="k">Versión del archivo</span>
+        <span class="v">V001</span>
+      </div>
+      <div class="meta-item">
+        <span class="k">Formato</span>
+        <span class="v">HTML único · sin dependencias</span>
+      </div>
+    </div>
+  </div>
+
+  <h2>Sobre este tutorial</h2>
+  <div class="card">
+    <p>Este tutorial convierte la <em>Guía Práctica de Hermes Agent</em> en una aplicación web educativa interactiva. Todo el contenido está basado en el material original, contrastado con la documentación oficial de Hermes Agent (Nous Research) en octubre de 2026.</p>
+    <p>El archivo incluye HTML, CSS, JavaScript y SVG en un solo documento. No usa archivos externos, CDN, librerías ni fuentes externas: funciona abriéndolo directamente en el navegador, incluso sin conexión.</p>
+  </div>
+
+  <h2>Novedades de esta versión</h2>
+  <div class="card">
+    <ul>
+      <li><strong>V001</strong> — Primera entrega. Tutorial completo con las ocho pestañas, SVG animado reutilizado en INICIO y CRÉDITOS, buscador, control de tamaño de texto, modo claro/oscuro, impresión a PDF y checklist con progreso guardado.</li>
+    </ul>
+  </div>
+
+  <h2>Funciones interactivas incluidas</h2>
+  <div class="gloss">
+    <div class="item"><b>Buscador</b><span>Resalta coincidencias en todas las pestañas y salta a la primera que contiene el término.</span></div>
+    <div class="item"><b>A− / A+</b><span>Cambia el tamaño del texto. La preferencia se guarda en el navegador.</span></div>
+    <div class="item"><b>Modo claro / oscuro</b><span>Alterna la paleta. La preferencia se guarda en el navegador.</span></div>
+    <div class="item"><b>Imprimir / PDF</b><span>Genera un documento con todas las pestañas, detalles abiertos y el SVG de créditos incluido.</span></div>
+    <div class="item"><b>Volver arriba</b><span>Aparece al bajar y te devuelve al principio de la página.</span></div>
+    <div class="item"><b>Barra de progreso</b><span>Muestra cuánto has leído del documento.</span></div>
+    <div class="item"><b>Checklist</b><span>Lista de comprobación final con progreso guardado en el navegador.</span></div>
+    <div class="item"><b>Botones COPIAR</b><span>Copian al portapapeles los prompts y fragmentos de código.</span></div>
+  </div>
+
+</section>
+
+</main>
+
+<button class="to-top" id="toTop" title="Volver arriba" aria-label="Volver arriba">↑</button>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="print-warn" id="printWarn" role="alert">
+  <h4>Impresión no disponible aquí</h4>
+  <p>Este documento parece estar dentro de un visor con restricciones. Abre el archivo directamente en tu navegador (no dentro de un visor) y pulsa <strong>Ctrl+P</strong> / <strong>Cmd+P</strong>.</p>
+  <button class="btn" id="printWarnClose" type="button">Entendido</button>
+</div>
+
+<!-- ==================== SVG FUENTE (único lugar donde existe el dibujo) ==================== -->
+<svg id="svgHeroSource" width="0" height="0" style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true" focusable="false">
+  <defs>
+    <radialGradient id="gBg" cx="50%" cy="45%" r="75%">
+      <stop offset="0%" stop-color="#16233f"/>
+      <stop offset="100%" stop-color="#0a0e1a"/>
+    </radialGradient>
+    <linearGradient id="gAcc" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+    <filter id="fGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="3.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <g id="svgHero">
+    <!-- Fondo -->
+    <rect x="0" y="0" width="820" height="260" rx="18" fill="url(#gBg)"/>
+
+    <!-- Rejilla tenue -->
+    <g opacity="0.055" stroke="#38bdf8" stroke-width="1">
+      <line x1="0" y1="65" x2="820" y2="65"/>
+      <line x1="0" y1="130" x2="820" y2="130"/>
+      <line x1="0" y1="195" x2="820" y2="195"/>
+      <line x1="205" y1="0" x2="205" y2="260"/>
+      <line x1="410" y1="0" x2="410" y2="260"/>
+      <line x1="615" y1="0" x2="615" y2="260"/>
+    </g>
+
+    <!-- Anillos giratorios alrededor del núcleo -->
+    <g transform="translate(410,130)">
+      <circle r="86" fill="none" stroke="url(#gAcc)" stroke-width="1.2" stroke-dasharray="5 11" opacity="0.55">
+        <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="26s" repeatCount="indefinite"/>
+      </circle>
+      <circle r="106" fill="none" stroke="#38bdf8" stroke-width="0.8" stroke-dasharray="2 16" opacity="0.28">
+        <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="40s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+
+    <!-- Conexiones del núcleo a los sub-agentes -->
+    <g fill="none" stroke="url(#gAcc)" stroke-width="1.6" opacity="0.48">
+      <path d="M410 130 C 320 130, 250 70, 180 70"/>
+      <path d="M410 130 C 320 130, 250 190, 180 190"/>
+      <path d="M410 130 C 500 130, 570 130, 640 130"/>
+    </g>
+
+    <!-- Pulsos viajeros -->
+    <circle r="3.6" fill="#38bdf8" filter="url(#fGlow)">
+      <animateMotion dur="2.8s" begin="0s" repeatCount="indefinite" keyPoints="0;1;0" keyTimes="0;0.5;1" calcMode="linear"
+        path="M410 130 C 320 130, 250 70, 180 70"/>
+      <animate attributeName="opacity" values="0.15;1;0.15" dur="2.8s" begin="0s" repeatCount="indefinite"/>
+    </circle>
+    <circle r="3.6" fill="#818cf8" filter="url(#fGlow)">
+      <animateMotion dur="2.8s" begin="0.9s" repeatCount="indefinite" keyPoints="0;1;0" keyTimes="0;0.5;1" calcMode="linear"
+        path="M410 130 C 320 130, 250 190, 180 190"/>
+      <animate attributeName="opacity" values="0.15;1;0.15" dur="2.8s" begin="0.9s" repeatCount="indefinite"/>
+    </circle>
+    <circle r="3.6" fill="#38bdf8" filter="url(#fGlow)">
+      <animateMotion dur="2.8s" begin="1.8s" repeatCount="indefinite" keyPoints="0;1;0" keyTimes="0;0.5;1" calcMode="linear"
+        path="M410 130 C 500 130, 570 130, 640 130"/>
+      <animate attributeName="opacity" values="0.15;1;0.15" dur="2.8s" begin="1.8s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Sub-agente 1 (izquierda arriba) -->
+    <g>
+      <circle cx="180" cy="70" r="26" fill="#0f172a" stroke="url(#gAcc)" stroke-width="1.8"/>
+      <g fill="#38bdf8">
+        <rect x="172" y="63" width="16" height="3" rx="1.5"/>
+        <rect x="172" y="69" width="16" height="3" rx="1.5"/>
+        <rect x="172" y="75" width="10" height="3" rx="1.5"/>
+      </g>
+      <circle cx="180" cy="70" r="26" fill="none" stroke="#38bdf8" stroke-width="1" opacity="0.35">
+        <animate attributeName="r" values="26;36;26" dur="3.6s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.35;0;0.35" dur="3.6s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+
+    <!-- Sub-agente 2 (izquierda abajo) -->
+    <g>
+      <circle cx="180" cy="190" r="26" fill="#0f172a" stroke="url(#gAcc)" stroke-width="1.8"/>
+      <g fill="#818cf8">
+        <rect x="172" y="182" width="16" height="16" rx="2"/>
+        <rect x="175" y="186" width="10" height="2" rx="1" fill="#0f172a"/>
+        <rect x="175" y="190" width="7" height="2" rx="1" fill="#0f172a"/>
+      </g>
+      <circle cx="180" cy="190" r="26" fill="none" stroke="#818cf8" stroke-width="1" opacity="0.35">
+        <animate attributeName="r" values="26;36;26" dur="3.6s" begin="1.2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.35;0;0.35" dur="3.6s" begin="1.2s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+
+    <!-- Sub-agente 3 (derecha) -->
+    <g>
+      <circle cx="640" cy="130" r="26" fill="#0f172a" stroke="url(#gAcc)" stroke-width="1.8"/>
+      <path d="M630 130 L650 122 L645 130 L650 138 Z" fill="#38bdf8"/>
+      <circle cx="640" cy="130" r="26" fill="none" stroke="#38bdf8" stroke-width="1" opacity="0.35">
+        <animate attributeName="r" values="26;36;26" dur="3.6s" begin="2.4s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.35;0;0.35" dur="3.6s" begin="2.4s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+
+    <!-- Núcleo (agente principal) -->
+    <g transform="translate(410,130)">
+      <!-- Halo pulsante -->
+      <circle r="42" fill="none" stroke="#38bdf8" stroke-width="2" opacity="0.5">
+        <animate attributeName="r" values="42;62;42" dur="3.2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;0;0.5" dur="3.2s" repeatCount="indefinite"/>
+      </circle>
+      <!-- Base -->
+      <circle r="42" fill="#0f172a" stroke="url(#gAcc)" stroke-width="2.6"/>
+      <!-- Anillo interior giratorio -->
+      <circle r="30" fill="none" stroke="#38bdf8" stroke-width="1" stroke-dasharray="3 6" opacity="0.6">
+        <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="12s" repeatCount="indefinite"/>
+      </circle>
+      <!-- Núcleo luminoso -->
+      <g filter="url(#fGlow)">
+        <circle r="16" fill="url(#gAcc)">
+          <animate attributeName="r" values="15;18;15" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+      <!-- Símbolo interior -->
+      <path d="M-8 0 L0 -9 L8 0 L0 9 Z" fill="#0a0e1a"/>
+    </g>
+
+    <!-- Entregas (pequeñas líneas verticales bajo el núcleo) -->
+    <g stroke="#818cf8" stroke-width="1.4" opacity="0.5">
+      <line x1="380" y1="180" x2="380" y2="196">
+        <animate attributeName="opacity" values="0.2;0.9;0.2" dur="2s" repeatCount="indefinite"/>
+      </line>
+      <line x1="410" y1="180" x2="410" y2="200">
+        <animate attributeName="opacity" values="0.2;0.9;0.2" dur="2s" begin="0.4s" repeatCount="indefinite"/>
+      </line>
+      <line x1="440" y1="180" x2="440" y2="196">
+        <animate attributeName="opacity" values="0.2;0.9;0.2" dur="2s" begin="0.8s" repeatCount="indefinite"/>
+      </line>
+    </g>
+  </g>
+</svg>
+
+<script>
+(function(){
+  'use strict';
+
+  /* =========================================================
+     1. TABS
+     ========================================================= */
+  function activateTab(id){
+    var tabs = document.querySelectorAll('.tab');
+    var panels = document.querySelectorAll('.panel');
+    for (var i = 0; i < tabs.length; i++){
+      var on = tabs[i].getAttribute('data-tab') === id;
+      tabs[i].classList.toggle('active', on);
+      tabs[i].setAttribute('aria-selected', on ? 'true' : 'false');
+    }
+    for (var j = 0; j < panels.length; j++){
+      panels[j].classList.toggle('active', panels[j].id === 'p-' + id);
+    }
+    window.scrollTo({top:0, behavior:'smooth'});
+    mountActive();
+  }
+
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      activateTab(t.getAttribute('data-tab'));
+      if (history.replaceState) history.replaceState(null, '', '#' + t.getAttribute('data-tab'));
+    });
+  });
+
+  /* =========================================================
+     2. SVG ANIMADO — plantilla única, montaje por innerHTML
+     ========================================================= */
+  var seq = 0, TPL = null, imgMode = false;
+
+  function template(){
+    if (TPL) return TPL;
+    var src = document.getElementById('svgHeroSource');
+    if (!src) { TPL = { defs:'', art:'' }; return TPL; }
+    var defsNode = src.querySelector('defs');
+    var artNode  = src.querySelector('#svgHero');
+    var d = defsNode ? defsNode.cloneNode(true) : document.createElement('defs');
+    var g = artNode  ? artNode.cloneNode(true)  : document.createElement('g');
+    var inner = d.querySelector('#svgHero');
+    if (inner && inner.parentNode) inner.parentNode.removeChild(inner);
+    g.removeAttribute('id');
+    TPL = { defs: d.innerHTML, art: g.outerHTML };
+    if (src.parentNode) src.parentNode.removeChild(src); // que no siga animando oculto
+    return TPL;
+  }
+
+  function markup(uid){
+    var t = template();
+    var s = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 260" width="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true">'
+          + '<defs>' + t.defs + '</defs>' + t.art + '</svg>';
+    ['gBg','gAcc','fGlow'].forEach(function(id){
+      s = s.split('id="' + id + '"').join('id="' + id + '-' + uid + '"')
+           .split('url(#' + id + ')').join('url(#' + id + '-' + uid + ')');
+    });
+    return s;
+  }
+
+  function mountOne(m){
+    if (!m) return;
+    m.textContent = '';
+    if (imgMode){
+      var im = new Image();
+      im.alt = m.getAttribute('aria-label') || '';
+      im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(markup('i' + (++seq)));
+      m.appendChild(im);
+      return;
+    }
+    m.innerHTML = markup('h' + (++seq));
+    var svg = m.querySelector('svg');
+    if (!svg) return;
+    try { svg.setCurrentTime(0); svg.unpauseAnimations(); } catch(e){}
+    var t0 = 0;
+    try { t0 = svg.getCurrentTime(); } catch(e){}
+    setTimeout(function(){
+      if (document.hidden) return;
+      if (m.querySelector('svg') !== svg) return;
+      var h = 0;
+      try { h = svg.getBoundingClientRect().height; } catch(e){}
+      var dt = 0;
+      try { dt = svg.getCurrentTime() - t0; } catch(e){}
+      if (h > 0 && dt < 0.3){
+        imgMode = true;
+        mountOne(m);
+      }
+    }, 1600);
+  }
+
+  function mountActive(){
+    var nodes = document.querySelectorAll('.panel.active [data-svg-hero]');
+    for (var i = 0; i < nodes.length; i++) mountOne(nodes[i]);
+  }
+
+  function mountAll(){
+    var nodes = document.querySelectorAll('[data-svg-hero]');
+    for (var i = 0; i < nodes.length; i++) mountOne(nodes[i]);
+  }
+
+  // Red de seguridad: si el panel visible tiene su contenedor vacío, volver a montarlo
+  setInterval(function(){
+    if (document.hidden) return;
+    var nodes = document.querySelectorAll('.panel.active [data-svg-hero]');
+    for (var i = 0; i < nodes.length; i++){
+      if (!nodes[i].firstElementChild) mountOne(nodes[i]);
+    }
+  }, 800);
+
+  /* =========================================================
+     3. IMPRESIÓN / PDF
+     ========================================================= */
+  var openedDetails = [];
+  var inIframe = false;
+  try { inIframe = (window.self !== window.top); } catch(e){ inIframe = true; }
+
+  function preparePrint(){
+    // 1) Montar los SVG de TODAS las pestañas, aunque no se hayan visitado
+    mountAll();
+    // 2) Fijarlos en un fotograma completo
+    var svgs = document.querySelectorAll('[data-svg-hero] svg');
+    for (var i = 0; i < svgs.length; i++){
+      try { svgs[i].setCurrentTime(2.6); svgs[i].pauseAnimations(); } catch(e){}
+    }
+    // 3) Abrir todos los <details> y recordar cuáles estaban cerrados
+    openedDetails = [];
+    var dets = document.querySelectorAll('details');
+    for (var j = 0; j < dets.length; j++){
+      if (!dets[j].open){ openedDetails.push(dets[j]); dets[j].open = true; }
+    }
+  }
+
+  function restoreAfterPrint(){
+    for (var i = 0; i < openedDetails.length; i++) openedDetails[i].open = false;
+    openedDetails = [];
+    var svgs = document.querySelectorAll('[data-svg-hero] svg');
+    for (var j = 0; j < svgs.length; j++){
+      try { svgs[j].unpauseAnimations(); } catch(e){}
+    }
+  }
+
+  window.addEventListener('beforeprint', preparePrint);
+  window.addEventListener('afterprint', restoreAfterPrint);
+
+  var printWarn = document.getElementById('printWarn');
+  document.getElementById('printWarnClose').addEventListener('click', function(){
+    printWarn.classList.remove('show');
+  });
+
+  document.getElementById('printBtn').addEventListener('click', function(){
+    preparePrint();
+    if (inIframe) printWarn.classList.add('show');
+    try {
+      window.print();
+    } catch(e){
+      printWarn.classList.add('show');
+    }
+  });
+
+  /* =========================================================
+     4. TEMA CLARO / OSCURO
+     ========================================================= */
+  var themeBtn = document.getElementById('themeToggle');
+  function applyTheme(light){
+    document.body.classList.toggle('light', light);
+    themeBtn.textContent = light ? 'Modo oscuro' : 'Modo claro';
+    try { localStorage.setItem('hermes-theme', light ? 'light' : 'dark'); } catch(e){}
+  }
+  var savedTheme = 'dark';
+  try { savedTheme = localStorage.getItem('hermes-theme') || 'dark'; } catch(e){}
+  applyTheme(savedTheme === 'light');
+  themeBtn.addEventListener('click', function(){
+    applyTheme(!document.body.classList.contains('light'));
+  });
+
+  /* =========================================================
+     5. TAMAÑO DE TEXTO
+     ========================================================= */
+  var FS_MIN = 13, FS_MAX = 22, FS_STEP = 1;
+  function getFS(){ return parseInt(document.documentElement.style.fontSize, 10) || 16; }
+  function setFS(v){
+    v = Math.max(FS_MIN, Math.min(FS_MAX, v));
+    document.documentElement.style.fontSize = v + 'px';
+    try { localStorage.setItem('hermes-fs', String(v)); } catch(e){}
+  }
+  var savedFS = 16;
+  try { savedFS = parseInt(localStorage.getItem('hermes-fs'), 10) || 16; } catch(e){}
+  setFS(savedFS);
+  document.getElementById('fontUp').addEventListener('click', function(){ setFS(getFS() + FS_STEP); });
+  document.getElementById('fontDown').addEventListener('click', function(){ setFS(getFS() - FS_STEP); });
+
+  /* =========================================================
+     6. VOLVER ARRIBA
+     ========================================================= */
+  var toTop = document.getElementById('toTop');
+  window.addEventListener('scroll', function(){
+    toTop.classList.toggle('show', window.scrollY > 400);
+  }, {passive:true});
+  toTop.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  /* =========================================================
+     7. BARRA DE PROGRESO
+     ========================================================= */
+  var fill = document.getElementById('progressFill');
+  function updateProgress(){
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    var p = h > 0 ? (window.scrollY / h) * 100 : 0;
+    fill.style.width = Math.min(100, Math.max(0, p)) + '%';
+  }
+  window.addEventListener('scroll', updateProgress, {passive:true});
+  window.addEventListener('resize', updateProgress);
+  updateProgress();
+
+  /* =========================================================
+     8. TOAST
+     ========================================================= */
+  var toast = document.getElementById('toast');
+  var toastTimer = null;
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 1600);
+  }
+
+  /* =========================================================
+     9. BOTONES COPIAR
+     ========================================================= */
+  function copyText(text){
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function(resolve, reject){
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        resolve();
+      } catch(e){ reject(e); }
+    });
+  }
+
+  document.querySelectorAll('.copyBtn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var wrap = btn.parentElement;
+      var pre = wrap ? wrap.querySelector('pre') : null;
+      if (!pre) return;
+      copyText(pre.innerText).then(function(){
+        showToast('Copiado al portapapeles');
+      }).catch(function(){
+        showToast('No se pudo copiar');
+      });
+    });
+  });
+
+  /* =========================================================
+     10. BUSCADOR
+     ========================================================= */
+  var searchInput = document.getElementById('searchInput');
+  var searchTimer = null;
+
+  function clearHighlights(){
+    document.querySelectorAll('mark.search-hl').forEach(function(m){
+      var parent = m.parentNode;
+      if (!parent) return;
+      parent.replaceChild(document.createTextNode(m.textContent), m);
+      parent.normalize();
+    });
+  }
+
+  function highlightIn(root, q){
+    var lower = q.toLowerCase();
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(n){
+        if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        var p = n.parentElement;
+        if (!p) return NodeFilter.FILTER_REJECT;
+        if (p.closest('.search-hl, script, style, .copyBtn, .toolbar, .tabs')) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var nodes = [], n;
+    while ((n = walker.nextNode())) nodes.push(n);
+    var count = 0;
+    nodes.forEach(function(node){
+      var text = node.nodeValue;
+      var pos = text.toLowerCase().indexOf(lower);
+      if (pos === -1) return;
+      var frag = document.createDocumentFragment();
+      var rest = text;
+      var p;
+      while ((p = rest.toLowerCase().indexOf(lower)) !== -1){
+        if (p > 0) frag.appendChild(document.createTextNode(rest.slice(0, p)));
+        var mk = document.createElement('mark');
+        mk.className = 'search-hl';
+        mk.textContent = rest.slice(p, p + q.length);
+        frag.appendChild(mk);
+        rest = rest.slice(p + q.length);
+        count++;
+      }
+      if (rest) frag.appendChild(document.createTextNode(rest));
+      node.parentNode.replaceChild(frag, node);
+    });
+    return count;
+  }
+
+  function runSearch(q){
+    clearHighlights();
+    if (!q || q.length < 2) return;
+    var panels = document.querySelectorAll('.panel');
+    var total = 0, firstPanelId = null;
+    for (var i = 0; i < panels.length; i++){
+      var c = highlightIn(panels[i], q);
+      if (c > 0 && !firstPanelId) firstPanelId = panels[i].id;
+      total += c;
+    }
+    if (total === 0){
+      showToast('Sin coincidencias');
+      return;
+    }
+    // Saltar al primer panel con coincidencias
+    if (firstPanelId && firstPanelId.indexOf('p-') === 0){
+      var tabId = firstPanelId.slice(2);
+      var currentActive = document.querySelector('.panel.active');
+      if (!currentActive || currentActive.id !== firstPanelId){
+        activateTab(tabId);
+      }
+      // Llevar al primer <mark>
+      setTimeout(function(){
+        var firstMark = document.querySelector('mark.search-hl');
+        if (firstMark) firstMark.scrollIntoView({behavior:'smooth', block:'center'});
+      }, 120);
+    }
+    showToast(total + (total === 1 ? ' coincidencia' : ' coincidencias'));
+  }
+
+  searchInput.addEventListener('input', function(){
+    clearTimeout(searchTimer);
+    var q = searchInput.value.trim();
+    searchTimer = setTimeout(function(){ runSearch(q); }, 280);
+  });
+  searchInput.addEventListener('keydown', function(e){
+    if (e.key === 'Enter'){
+      clearTimeout(searchTimer);
+      runSearch(searchInput.value.trim());
+    }
+  });
+
+  /* =========================================================
+     11. CHECKLIST CON localStorage
+     ========================================================= */
+  document.querySelectorAll('.checklist input[type=checkbox]').forEach(function(cb){
+    var key = 'hermes-' + (cb.getAttribute('data-key') || cb.id || Math.random());
+    try {
+      if (localStorage.getItem(key) === '1') cb.checked = true;
+    } catch(e){}
+    cb.addEventListener('change', function(){
+      try { localStorage.setItem(key, cb.checked ? '1' : '0'); } catch(e){}
+    });
+  });
+
+  /* =========================================================
+     12. ARRANQUE
+     ========================================================= */
+  function init(){
+    // Panel inicial según el hash de la URL
+    var hash = (location.hash || '').replace('#', '');
+    var validTabs = ['inicio','conceptos','procedimiento','practica','errores','resumen','fuentes','creditos'];
+    if (hash && validTabs.indexOf(hash) !== -1){
+      activateTab(hash);
+    } else {
+      mountActive();
+    }
+    updateProgress();
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  // Escuchar cambios de hash (enlaces internos, botones atrás/adelante)
+  window.addEventListener('hashchange', function(){
+    var hash = (location.hash || '').replace('#', '');
+    var validTabs = ['inicio','conceptos','procedimiento','practica','errores','resumen','fuentes','creditos'];
+    if (hash && validTabs.indexOf(hash) !== -1){
+      activateTab(hash);
+    }
+  });
+
+})();
+</script>
+
+</body>
+</html>
